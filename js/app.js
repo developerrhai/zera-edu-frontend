@@ -1034,7 +1034,11 @@ function renderAdminUsersTable() {
                 <td class="py-3"><span class="px-2 py-0.5 rounded-full font-extrabold text-[10px] uppercase ${badgeClass}">${u.role}</span></td>
                 <td class="py-3 text-slate-500">${new Date(u.createdAt).toLocaleDateString()}</td>
                 <td class="py-3 text-right space-x-1">
-                    <button onclick="executeAdminUserRoleChange(${u.id}, '${u.role === 'admin' ? 'student' : 'admin'}')" class="text-indigo-600 font-bold hover:underline">Toggle Admin</button>
+                    <select onchange="executeAdminUserRoleChange(${u.id}, this.value)" class="bg-slate-50 border rounded p-1 text-[11px] font-bold text-slate-700 outline-none">
+                        <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
+                        <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
                     <button onclick="executeAdminUserToggleActive(${u.id}, ${!u.isActive})" class="${u.isActive ? 'text-rose-600' : 'text-emerald-600'} font-bold hover:underline ml-2">
                         ${u.isActive ? 'Deactivate' : 'Activate'}
                     </button>
@@ -1046,6 +1050,16 @@ function renderAdminUsersTable() {
 
 async function executeAdminUserRoleChange(userId, newRole) {
     try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            const user = adminUsersList.find(u => u.id === userId);
+            if (user) {
+                user.role = newRole;
+                triggerNotificationToast(`Demo Mode: User role updated to ${newRole}.`, "success");
+                // Re-render
+                renderAdminUsersTable();
+            }
+            return;
+        }
         await apiFetch(`/admin/users/${userId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
