@@ -121,11 +121,37 @@ async function executeAuthVerification(e) {
         // Store tokens
         localStorage.setItem("accessToken", result.accessToken);
         localStorage.setItem("refreshToken", result.refreshToken);
+        localStorage.removeItem("isDemoMode");
         activeAuthenticatedUser = result.user;
         
         launchIntegratedApplicationFrame();
     } catch (err) {
-        triggerNotificationToast("Could not connect to authentication gateway.", "error");
+        console.warn("Could not connect to authentication gateway. Activating local demo mode fallback.", err);
+        
+        // Fallback demo mode logic
+        localStorage.setItem("isDemoMode", "true");
+        localStorage.setItem("accessToken", "demo-access-token");
+        localStorage.setItem("refreshToken", "demo-refresh-token");
+        
+        let name = "Demo User";
+        let role = selectedAuthenticationRoleScope;
+        
+        if (email === "admin@zeraedu.com") {
+            name = "System Administrator";
+            role = "admin";
+        } else if (email === "ananya@zeraedu.com") {
+            name = "Prof. Ananya Kulkarni";
+            role = "teacher";
+        } else if (email === "kabir@zeraedu.com") {
+            name = "Kabir Mehta";
+            role = "student";
+        } else {
+            name = email.split('@')[0].toUpperCase();
+        }
+        
+        activeAuthenticatedUser = { name, email, role };
+        triggerNotificationToast("Offline Demo Mode: Connected using pre-seeded local client data.", "info");
+        launchIntegratedApplicationFrame();
     }
 }
 
@@ -393,6 +419,155 @@ async function commitAccountAllocationPayment() {
 // State synchronization mapping
 async function synchronizePlatformStateMatrices() {
     if (!activeAuthenticatedUser) return;
+
+    if (localStorage.getItem("isDemoMode") === "true") {
+        // Populate mock database
+        teachersProfileRegistry = [
+            {
+                id: "1",
+                userId: 2,
+                name: "Prof. Ananya Kulkarni",
+                subject: "Mathematics",
+                board: "ICSE Framework",
+                standard: "Grade 12",
+                timingGroup: "Evening",
+                mapRadiusKm: 5,
+                youtubeUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                cost: 650,
+                expYears: 8,
+                stars: 5,
+                degree: "M.Sc. Mathematics (IIT Bombay)",
+                avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+                slots: [
+                    { id: 1, day: "Monday", time_window: "04:00 PM - 06:00 PM", location: "Online Virtual" },
+                    { id: 2, day: "Wednesday", time_window: "05:00 PM - 07:00 PM", location: "Offline Center" }
+                ]
+            },
+            {
+                id: "2",
+                userId: 3,
+                name: "Dr. Rajesh Kapoor",
+                subject: "Physics",
+                board: "CBSE Framework",
+                standard: "Grade 10",
+                timingGroup: "Morning",
+                mapRadiusKm: 3,
+                youtubeUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                cost: 800,
+                expYears: 12,
+                stars: 4,
+                degree: "Ph.D. in High Energy Particle Physics",
+                avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80",
+                slots: [
+                    { id: 3, day: "Tuesday", time_window: "10:00 AM - 12:00 PM", location: "Online Virtual" }
+                ]
+            },
+            {
+                id: "3",
+                userId: 4,
+                name: "Dr. Vikram Malhotra",
+                subject: "Chemistry",
+                board: "CBSE Framework",
+                standard: "Grade 12",
+                timingGroup: "Morning",
+                mapRadiusKm: 10,
+                youtubeUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+                cost: 700,
+                expYears: 15,
+                stars: 5,
+                degree: "Ph.D. in Organic Chemistry (NCL Pune)",
+                avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+                slots: [
+                    { id: 4, day: "Thursday", time_window: "09:00 AM - 11:00 AM", location: "Online Virtual" }
+                ]
+            }
+        ];
+
+        systemActiveBookings = [
+            { id: 1, ref_code: "ZERA-101", studentId: 10, studentName: "Kabir Mehta", teacherName: "Prof. Ananya Kulkarni", slotInfo: "Friday (02:00 PM - 04:00 PM)", location: "Online Virtual", status: "Pending Completion", date: "2026-07-08" },
+            { id: 2, ref_code: "ZERA-102", studentId: 10, studentName: "Kabir Mehta", teacherName: "Dr. Rajesh Kapoor", slotInfo: "Wednesday (10:00 AM - 12:00 PM)", location: "Online Virtual", status: "Completed", date: "2026-07-08" },
+            { id: 3, ref_code: "ZERA-103", studentId: 11, studentName: "Rohan Sharma", teacherName: "Dr. Vikram Malhotra", slotInfo: "Thursday (09:00 AM - 11:00 AM)", location: "Online Virtual", status: "Cancelled", date: "2026-07-08" }
+        ];
+
+        systemPaymentsLedger = [
+            { id: 1, transaction_id: "TXN_9921", amount: 650.00, gateway_method: "UPI Razorpay API", status: "settled", created_at: "2026-07-08T10:00:00.000Z" },
+            { id: 2, transaction_id: "TXN_8812", amount: 800.00, gateway_method: "UPI Razorpay API", status: "settled", created_at: "2026-07-08T11:00:00.000Z" },
+            { id: 3, transaction_id: "TXN_7761", amount: 3999.00, gateway_method: "Card Payment", status: "settled", created_at: "2026-07-08T12:00:00.000Z" }
+        ];
+
+        systemAttendanceRecords = [
+            { id: 1, studentName: "Kabir Mehta", teacherName: "Prof. Ananya Kulkarni", date: "2026-07-08", status: "Present", remarks: "Completed academic node connection." },
+            { id: 2, studentName: "Kabir Mehta", teacherName: "Prof. Ananya Kulkarni", date: "2026-07-07", status: "Absent", remarks: "Student was away." }
+        ];
+
+        systemSubscriptionPlans = [
+            { id: 1, name: "Standard Academic Hub", price: 1999.00, billing_cycle: "Monthly", features: "Up to 3 hours of online sessions per week, Standard matching priorities, Email support vectors" },
+            { id: 2, name: "Premium Unlimited Matrix", price: 3999.00, billing_cycle: "Monthly", features: "Unlimited online & offline sessions, 24/7 dedicated support priority, Google Maps radius override access" }
+        ];
+
+        activeUserSubscription = {
+            planName: "Premium Unlimited Matrix",
+            price: 3999.00,
+            billingCycle: "Monthly",
+            status: "Active",
+            end_date: "2026-08-08"
+        };
+
+        if (activeAuthenticatedUser.role === 'admin') {
+            setTimeout(() => {
+                const bEl = document.getElementById('stat-billings'); if (bEl) bEl.innerText = "₹5,449";
+                const rEl = document.getElementById('stat-revenue'); if (rEl) rEl.innerText = "₹817";
+                const tEl = document.getElementById('stat-tutors'); if (tEl) tEl.innerText = "3 Nodes";
+                const qEl = document.getElementById('stat-queue'); if (qEl) qEl.innerText = "1 Node";
+            }, 50);
+
+            onboardingPipelineQueue = [
+                { id: 5, name: "Dr. Smita Patil", email: "smita@zeraedu.com", subject: "Biology", degree: "Ph.D. in Botany", cost_per_hour: 550, experience_years: 6 }
+            ];
+
+            adminUsersList = [
+                { id: 1, name: "System Administrator", email: "admin@zeraedu.com", role: "admin", is_active: 1 },
+                { id: 10, name: "Kabir Mehta", email: "kabir@zeraedu.com", role: "student", is_active: 1 },
+                { id: 11, name: "Rohan Sharma", email: "rohan@zeraedu.com", role: "student", is_active: 1 },
+                { id: 12, name: "Priya Deshmukh", email: "priya@zeraedu.com", role: "student", is_active: 1 },
+                { id: 2, name: "Prof. Ananya Kulkarni", email: "ananya@zeraedu.com", role: "teacher", is_active: 1 },
+                { id: 3, name: "Dr. Rajesh Kapoor", email: "rajesh@zeraedu.com", role: "teacher", is_active: 1 },
+                { id: 4, name: "Dr. Vikram Malhotra", email: "vikram@zeraedu.com", role: "teacher", is_active: 1 }
+            ];
+
+            adminSubscribersList = [
+                { studentName: "Kabir Mehta", email: "kabir@zeraedu.com", planName: "Premium Unlimited Matrix", status: "Active", startDate: "2026-07-08" },
+                { studentName: "Rohan Sharma", email: "rohan@zeraedu.com", planName: "Standard Academic Hub", status: "Active", startDate: "2026-07-08" }
+            ];
+
+            adminEnquiriesList = [
+                { id: 1, type: "callback", student_name: "Amit Sharma", parent_name: "Vijay Sharma", contact_number: "9876543210", email: "vijay@gmail.com", address: "Aundh Road, Pune", board: "CBSE", standard: "Class 11-12", status: "new" },
+                { id: 2, type: "callback", student_name: "Sunita Patel", parent_name: "Karan Patel", contact_number: "9988776655", email: "karan@patel.com", address: "Wakad Main Road, Pune", board: "ICSE", standard: "Class 9-10", status: "contacted" },
+                { id: 3, type: "contact", student_name: "Ramesh Kulkarni", email: "ramesh@gmail.com", contact_number: "9890123456", inquiry_type: "Billing & Payments", message: "I wanted to check what card networks are accepted for the Academic Pro plan.", status: "resolved" }
+            ];
+
+            adminAttendanceList = systemAttendanceRecords;
+        }
+
+        renderStudentTeacherDirectoryGrid();
+        renderStudentActiveBookingsTable();
+        renderTeacherDynamicSlotsMatrix();
+        renderTeacherAssignedBookingsTable();
+        renderAdminCoreControlPanel();
+        renderGlobalPaymentsLedger();
+
+        renderAttendanceLog();
+        renderAttendanceCalendar();
+        renderSubscriptionPlans();
+
+        if (activeAuthenticatedUser.role === 'admin') {
+            renderAdminUsersTable();
+            renderAdminAttendanceMonitor();
+            renderAdminSubscriptionOverview();
+            renderAdminEnquiriesTable();
+        }
+        return;
+    }
 
     try {
         // Fetch directory profiles

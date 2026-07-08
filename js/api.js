@@ -6,6 +6,14 @@ const API_BASE = "http://localhost:5000/api";
  * and sliding refresh session interception.
  */
 async function apiFetch(endpoint, options = {}) {
+    if (localStorage.getItem("isDemoMode") === "true") {
+        console.log(`[Demo API Mock] ${options.method || 'GET'} ${endpoint}`);
+        if (endpoint.startsWith('/auth/forgot-password')) {
+            return { message: "Simulated password reset instructions sent to inbox." };
+        }
+        return { success: true };
+    }
+
     const accessToken = localStorage.getItem("accessToken");
     
     options.headers = options.headers || {};
