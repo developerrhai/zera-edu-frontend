@@ -92,7 +92,7 @@ async function executeAuthVerification(e) {
     
     try {
         // Attempt login via API
-        const loginRes = await fetch(`http://localhost:5000/api/auth/login`, {
+        const loginRes = await fetch(`${API_BASE}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -103,7 +103,7 @@ async function executeAuthVerification(e) {
         // If login returns unauthorized credentials fallback to register (matches frontend mocks logic)
         if (!loginRes.ok && result.error && result.error.includes("Invalid")) {
             const name = email.split('@')[0].toUpperCase();
-            const registerRes = await fetch(`http://localhost:5000/api/auth/register`, {
+            const registerRes = await fetch(`${API_BASE}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password, name, role: selectedAuthenticationRoleScope })

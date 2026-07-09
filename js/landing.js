@@ -1,3 +1,7 @@
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+    ? "http://localhost:5000/api" 
+    : "http://65.2.70.49:5000/api";
+
 document.addEventListener("DOMContentLoaded", () => {
     loadTutors();
 
@@ -25,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = { studentName, parentName, contactNumber, email, address, board, standard, schoolName };
 
             try {
-                const response = await fetch('http://localhost:5000/api/enquiries/callback', {
+                const response = await fetch(`${API_BASE}/enquiries/callback`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -63,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = { fullName, email, phoneNumber, inquiryType, message };
 
             try {
-                const response = await fetch('http://localhost:5000/api/enquiries/contact', {
+                const response = await fetch(`${API_BASE}/enquiries/contact`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -132,7 +136,7 @@ async function loadTutors(filters = {}) {
     });
 
     try {
-        const res = await fetch(`http://localhost:5000/api/teachers?${params.toString()}`);
+        const res = await fetch(`${API_BASE}/teachers?${params.toString()}`);
         const data = await res.json();
         
         if (data.success) {
