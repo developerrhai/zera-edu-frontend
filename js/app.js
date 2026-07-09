@@ -1034,18 +1034,87 @@ function renderAdminUsersTable() {
                 <td class="py-3"><span class="px-2 py-0.5 rounded-full font-extrabold text-[10px] uppercase ${badgeClass}">${u.role}</span></td>
                 <td class="py-3 text-slate-500">${new Date(u.createdAt).toLocaleDateString()}</td>
                 <td class="py-3 text-right space-x-1">
-                    <select onchange="executeAdminUserRoleChange(${u.id}, this.value)" class="bg-slate-50 border rounded p-1 text-[11px] font-bold text-slate-700 outline-none">
-                        <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
-                        <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
-                        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-                    </select>
-                    <button onclick="executeAdminUserToggleActive(${u.id}, ${!u.isActive})" class="${u.isActive ? 'text-rose-600' : 'text-emerald-600'} font-bold hover:underline ml-2">
-                        ${u.isActive ? 'Deactivate' : 'Activate'}
-                    </button>
+                    ${u.role === 'teacher' ? `
+                        <label class="text-[10px] text-slate-400 mr-2 font-bold">Rank:
+                            <input type="number" value="${u.displayOrder}" onchange="executeAdminTeacherOrderChange('${u.id}', this.value)" class="w-12 border rounded text-center p-0.5 bg-slate-50 text-slate-800 font-bold outline-none focus:bg-white focus:border-indigo-500">
+                        </label>
+                        <button onclick="executeAdminDeleteTeacher('${u.id}')" class="text-rose-600 font-bold hover:underline ml-2">
+                            Remove
+                        </button>
+                    ` : `
+                        <select onchange="executeAdminUserRoleChange('${u.id}', this.value)" class="bg-slate-50 border rounded p-1 text-[11px] font-bold text-slate-700 outline-none">
+                            <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
+                            <option value="teacher" ${u.role === 'teacher' ? 'selected' : ''}>Teacher</option>
+                            <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                        <button onclick="executeAdminUserToggleActive('${u.id}', ${!u.isActive})" class="${u.isActive ? 'text-rose-600' : 'text-emerald-600'} font-bold hover:underline ml-2">
+                            ${u.isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                    `}
                 </td>
             </tr>
         `;
     });
+}
+
+function openAddTeacherModal() {
+    document.getElementById('modal-add-teacher').classList.replace('hidden', 'flex');
+}
+
+function closeAddTeacherModal() {
+    document.getElementById('modal-add-teacher').classList.replace('flex', 'hidden');
+    document.getElementById('add-teacher-form').reset();
+}
+
+async function commitAddTeacherRequest(event) {
+    event.preventDefault();
+    const name = document.getElementById('add-teacher-name').value;
+    const email = document.getElementById('add-teacher-email').value;
+    const password = document.getElementById('add-teacher-password').value;
+    const subject = document.getElementById('add-teacher-subject').value;
+    const costPerHour = Number(document.getElementById('add-teacher-cost').value);
+
+    try {
+        await apiFetch('/admin/teachers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, subject, costPerHour })
+        });
+        triggerNotificationToast("Teacher registered and verified successfully.", "success");
+        closeAddTeacherModal();
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function executeAdminTeacherOrderChange(userId, newOrderVal) {
+    const val = parseInt(newOrderVal, 10);
+    if (isNaN(val)) return;
+    try {
+        await apiFetch(`/admin/teachers/${userId}/display-order`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ displayOrder: val })
+        });
+        triggerNotificationToast("Teacher sorting weight updated.", "success");
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function executeAdminDeleteTeacher(userId) {
+    if (!confirm("Are you sure you want to completely remove this teacher account and profile?")) return;
+    try {
+        await apiFetch(`/admin/teachers/${userId}`, {
+            method: 'DELETE'
+        });
+        triggerNotificationToast("Teacher account and profile removed.", "success");
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function executeAdminUserRoleChange(userId, newRole) {
