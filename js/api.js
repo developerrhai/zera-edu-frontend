@@ -1,7 +1,7 @@
 // Central API environment configurations
 const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
     ? "http://localhost:5000/api" 
-    : "http://zeraedu.com:5000/api";
+    : "http://zeraedu.com:5005/api";
 
 /**
  * Custom fetch client supporting automatic JWT authorization token injection
