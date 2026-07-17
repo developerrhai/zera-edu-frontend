@@ -14,6 +14,8 @@ let adminUsersList = [];
 let adminSubscribersList = [];
 let adminEnquiriesList = [];
 let adminAttendanceList = [];
+let myInquiriesList = [];
+let adminInquiriesList = [];
 
 
 const roleMenuRouteMatrices = {
@@ -24,6 +26,7 @@ const roleMenuRouteMatrices = {
         { label: 'Subscriptions', icon: 'zap', viewId: 'view-shared-subscriptions' },
         { label: 'Payments', icon: 'receipt', viewId: 'view-payment-history' },
         { label: 'Refer & Earn', icon: 'gift', viewId: 'view-refer-earn' },
+        { label: 'Support Inquiries', icon: 'help-circle', viewId: 'view-shared-inquiries' },
     ],
     teacher: [
         { label: 'Manage Slots', icon: 'calendar-plus', viewId: 'view-teacher-slots' },
@@ -32,6 +35,7 @@ const roleMenuRouteMatrices = {
         { label: 'Subscriptions', icon: 'zap', viewId: 'view-shared-subscriptions' },
         { label: 'Payments', icon: 'receipt', viewId: 'view-payment-history' },
         { label: 'Refer & Earn', icon: 'gift', viewId: 'view-refer-earn' },
+        { label: 'Support Inquiries', icon: 'help-circle', viewId: 'view-shared-inquiries' },
     ],
     admin: [
         { label: 'Dashboard', icon: 'layout-dashboard', viewId: 'view-admin-dashboard' },
@@ -41,6 +45,7 @@ const roleMenuRouteMatrices = {
         { label: 'Attendance Monitor', icon: 'calendar-check-2', viewId: 'view-admin-attendance' },
         { label: 'Subscriptions', icon: 'credit-card', viewId: 'view-admin-subscriptions' },
         { label: 'Enquiries', icon: 'message-square', viewId: 'view-admin-enquiries' },
+        { label: 'Inquiry Tickets', icon: 'help-circle', viewId: 'view-admin-inquiries' },
         { label: 'Payments', icon: 'receipt', viewId: 'view-payment-history' },
         { label: 'Settings', icon: 'settings', viewId: 'view-admin-settings' },
     ],
@@ -631,6 +636,17 @@ async function synchronizePlatformStateMatrices() {
             ];
 
             adminAttendanceList = systemAttendanceRecords;
+
+            myInquiriesList = [
+                { id: "inq_1", subject: "Subscription payment query", message: "My premium payment was processed but subscription is showing pending.", status: "resolved", adminReply: "This has been resolved. Your premium plan is now active.", createdAt: "2026-07-16T12:00:00.000Z", updatedAt: "2026-07-16T14:00:00.000Z" },
+                { id: "inq_2", subject: "Rescheduling class with Dr. Rajesh", message: "Need to change timing of Tuesday morning slot to afternoon.", status: "pending", adminReply: null, createdAt: "2026-07-17T10:00:00.000Z", updatedAt: "2026-07-17T10:00:00.000Z" }
+            ];
+
+            adminInquiriesList = [
+                { id: "inq_1", subject: "Subscription payment query", message: "My premium payment was processed but subscription is showing pending.", status: "resolved", adminReply: "This has been resolved. Your premium plan is now active.", userRole: "student", userName: "Kabir Mehta", userEmail: "kabir@zeraedu.com", createdAt: "2026-07-16T12:00:00.000Z", updatedAt: "2026-07-16T14:00:00.000Z" },
+                { id: "inq_2", subject: "Rescheduling class with Dr. Rajesh", message: "Need to change timing of Tuesday morning slot to afternoon.", status: "pending", adminReply: null, userRole: "student", userName: "Kabir Mehta", userEmail: "kabir@zeraedu.com", createdAt: "2026-07-17T10:00:00.000Z", updatedAt: "2026-07-17T10:00:00.000Z" },
+                { id: "inq_3", subject: "Tutor registration payout help", message: "How do I claim my monthly hours payout?", status: "in-progress", adminReply: "We are reviewing your payout profile details.", userRole: "teacher", userName: "Prof. Ananya Kulkarni", userEmail: "ananya@zeraedu.com", createdAt: "2026-07-17T11:00:00.000Z", updatedAt: "2026-07-17T11:30:00.000Z" }
+            ];
         }
 
         renderStudentTeacherDirectoryGrid();
@@ -649,7 +665,9 @@ async function synchronizePlatformStateMatrices() {
             renderAdminAttendanceMonitor();
             renderAdminSubscriptionOverview();
             renderAdminEnquiriesTable();
+            renderAdminInquiryTable();
         }
+        renderSharedInquiriesTable();
         return;
     }
 
@@ -699,6 +717,14 @@ async function synchronizePlatformStateMatrices() {
 
             const attendanceAllRes = await apiFetch('/attendance');
             adminAttendanceList = attendanceAllRes.attendance;
+
+            const inqRes = await apiFetch('/v1/inquiries');
+            adminInquiriesList = inqRes.inquiries;
+        }
+
+        if (activeAuthenticatedUser.role === 'student' || activeAuthenticatedUser.role === 'teacher') {
+            const inqRes = await apiFetch('/v1/inquiries/my-inquiries');
+            myInquiriesList = inqRes.inquiries;
         }
 
         renderStudentTeacherDirectoryGrid();
@@ -717,7 +743,9 @@ async function synchronizePlatformStateMatrices() {
             renderAdminAttendanceMonitor();
             renderAdminSubscriptionOverview();
             renderAdminEnquiriesTable();
+            renderAdminInquiryTable();
         }
+        renderSharedInquiriesTable();
     } catch (err) {
         console.error("State synchronization failed: ", err);
     }
@@ -1401,6 +1429,252 @@ async function updateEnquiryStatus(enquiryId, statusVal) {
             body: JSON.stringify({ status: statusVal })
         });
         triggerNotificationToast("Enquiry pipeline state updated.", "success");
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
+// ─── Support Inquiries System ───
+
+// Render user support inquiries list
+function renderSharedInquiriesTable() {
+    const tableBody = document.getElementById('shared-inquiries-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+
+    if (!myInquiriesList || myInquiriesList.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="py-8 text-center text-slate-400 font-medium">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
+                        <span>No support tickets logged.</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+    }
+
+    myInquiriesList.forEach(inq => {
+        let statusBadge = '';
+        if (inq.status === 'pending') {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-800">Pending</span>';
+        } else if (inq.status === 'in-progress') {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-blue-100 text-blue-800">In-Progress</span>';
+        } else if (inq.status === 'resolved') {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800">Resolved</span>';
+        }
+
+        const dateStr = new Date(inq.createdAt).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const replySection = inq.adminReply 
+            ? `<div class="bg-indigo-50 border border-indigo-100 rounded-lg p-2.5 mt-2 text-[11px] font-medium text-slate-700 leading-relaxed shadow-sm">
+                 <div class="flex items-center gap-1 text-[9px] font-black uppercase text-indigo-600 tracking-wider mb-1"><i data-lucide="message-square" class="w-3 h-3"></i> Admin Reply:</div>
+                 ${inq.adminReply}
+               </div>`
+            : '<span class="text-slate-400 text-[11px] font-normal italic">Waiting for reply</span>';
+
+        tableBody.innerHTML += `
+            <tr class="border-b text-xs hover:bg-slate-50/55 transition-all">
+                <td class="py-3 font-semibold text-slate-600 align-top whitespace-nowrap pr-2">${dateStr}</td>
+                <td class="py-3 font-black text-slate-850 align-top pr-2">${inq.subject}</td>
+                <td class="py-3 font-medium text-slate-600 max-w-[200px] align-top truncate" title="${inq.message}">${inq.message}</td>
+                <td class="py-3 align-top pr-2">${statusBadge}</td>
+                <td class="py-3 text-right align-top">${replySection}</td>
+            </tr>
+        `;
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+}
+
+// Submit a new ticket
+async function commitInquirySubmission(event) {
+    event.preventDefault();
+    const subject = document.getElementById('inquiry-subject').value;
+    const message = document.getElementById('inquiry-message').value;
+
+    if (!subject || !message) {
+        return triggerNotificationToast("Subject and message are required.", "error");
+    }
+
+    try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            const mockInq = {
+                id: "inq_" + Date.now(),
+                subject,
+                message,
+                status: "pending",
+                adminReply: null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            myInquiriesList.unshift(mockInq);
+            adminInquiriesList.unshift({
+                ...mockInq,
+                userRole: activeAuthenticatedUser.role,
+                userName: activeAuthenticatedUser.name,
+                userEmail: activeAuthenticatedUser.email
+            });
+            triggerNotificationToast("Ticket logged in demo simulation mode.", "success");
+            document.getElementById('shared-inquiry-form').reset();
+            renderSharedInquiriesTable();
+            return;
+        }
+
+        const data = await apiFetch('/v1/inquiries', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject, message })
+        });
+
+        triggerNotificationToast(data.message || "Support ticket transmitted successfully.", "success");
+        document.getElementById('shared-inquiry-form').reset();
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Render admin tickets dashboard
+function renderAdminInquiryTable() {
+    const tableBody = document.getElementById('admin-inquiries-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+
+    const roleFilter = document.getElementById('admin-inq-role-filter').value;
+    const statusFilter = document.getElementById('admin-inq-status-filter').value;
+
+    let filtered = adminInquiriesList || [];
+
+    if (roleFilter) {
+        filtered = filtered.filter(inq => inq.userRole === roleFilter);
+    }
+    if (statusFilter) {
+        filtered = filtered.filter(inq => inq.status === statusFilter);
+    }
+
+    // Update statistics stats count
+    const totalCount = adminInquiriesList.length;
+    const pendingCount = adminInquiriesList.filter(inq => inq.status === 'pending').length;
+    const progressCount = adminInquiriesList.filter(inq => inq.status === 'in-progress').length;
+    const resolvedCount = adminInquiriesList.filter(inq => inq.status === 'resolved').length;
+
+    document.getElementById('admin-inq-stat-total').innerText = totalCount;
+    document.getElementById('admin-inq-stat-pending').innerText = pendingCount;
+    document.getElementById('admin-inq-stat-progress').innerText = progressCount;
+    document.getElementById('admin-inq-stat-resolved').innerText = resolvedCount;
+
+    if (filtered.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-8 text-center text-slate-400 font-medium">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i data-lucide="inbox" class="w-8 h-8 text-slate-300"></i>
+                        <span>No matching support tickets found.</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+    }
+
+    filtered.forEach(inq => {
+        let statusBadge = '';
+        if (inq.status === 'pending') {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-800">Pending</span>';
+        } else if (inq.status === 'in-progress') {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-blue-100 text-blue-800">In-Progress</span>';
+        } else if (inq.status === 'resolved') {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800">Resolved</span>';
+        }
+
+        const dateStr = new Date(inq.createdAt).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        tableBody.innerHTML += `
+            <tr class="border-b text-xs hover:bg-slate-50/50 transition-all">
+                <td class="py-3 font-semibold text-slate-600 whitespace-nowrap pr-2">${dateStr}</td>
+                <td class="py-3 font-black text-slate-900">${inq.userName} <span class="text-[10px] font-medium text-slate-400 block">${inq.userEmail}</span></td>
+                <td class="py-3"><span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold uppercase tracking-wider">${inq.userRole}</span></td>
+                <td class="py-3 font-black text-slate-800">${inq.subject}</td>
+                <td class="py-3">${statusBadge}</td>
+                <td class="py-3 text-right">
+                    <button onclick="openAdminInquiryReplyModal('${inq.id}')" class="bg-indigo-600 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg shadow-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-1.5 ml-auto"><i data-lucide="message-square" class="w-3.5 h-3.5"></i> View & Reply</button>
+                </td>
+            </tr>
+        `;
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+}
+
+function openAdminInquiryReplyModal(inquiryId) {
+    const inq = adminInquiriesList.find(i => i.id === inquiryId);
+    if (!inq) return;
+
+    document.getElementById('reply-target-inquiry-id').value = inq.id;
+    document.getElementById('modal-inq-user-meta').innerText = `${inq.userName} (${inq.userRole.toUpperCase()}) - ${inq.userEmail}`;
+    document.getElementById('modal-inq-subject').innerText = inq.subject;
+    document.getElementById('modal-inq-message').innerText = inq.message;
+    document.getElementById('reply-inq-status').value = inq.status;
+    document.getElementById('reply-inq-comment').value = inq.adminReply || '';
+
+    const modal = document.getElementById('modal-admin-inquiry-reply');
+    modal.classList.replace('hidden', 'flex');
+}
+
+function closeAdminInquiryReplyModal() {
+    const modal = document.getElementById('modal-admin-inquiry-reply');
+    modal.classList.replace('flex', 'hidden');
+}
+
+async function submitAdminInquiryReply(event) {
+    event.preventDefault();
+    const id = document.getElementById('reply-target-inquiry-id').value;
+    const status = document.getElementById('reply-inq-status').value;
+    const adminReply = document.getElementById('reply-inq-comment').value;
+
+    try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            const inq = adminInquiriesList.find(i => i.id === id);
+            if (inq) {
+                inq.status = status;
+                inq.adminReply = adminReply;
+            }
+            const myInq = myInquiriesList.find(i => i.id === id);
+            if (myInq) {
+                myInq.status = status;
+                myInq.adminReply = adminReply;
+            }
+            triggerNotificationToast("Response updated in demo simulation.", "success");
+            closeAdminInquiryReplyModal();
+            renderAdminInquiryTable();
+            return;
+        }
+
+        const data = await apiFetch(`/v1/inquiries/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, adminReply })
+        });
+
+        triggerNotificationToast(data.message || "Response updated successfully.", "success");
+        closeAdminInquiryReplyModal();
         await synchronizePlatformStateMatrices();
     } catch (err) {
         console.error(err);

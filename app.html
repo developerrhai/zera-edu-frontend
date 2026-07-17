@@ -704,6 +704,112 @@
                 </div>
             </div>
 
+            <div id="view-shared-inquiries" class="domain-view-pane hidden space-y-6">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="help-circle" class="text-indigo-600"></i> Support Inquiries & Tickets</h2>
+                    <p class="text-xs text-slate-400">Submit a request to the platform administration support desk and monitor resolution status.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Form Column -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="message-square" class="text-indigo-600"></i> New Ticket Submission</h3>
+                        <form id="shared-inquiry-form" onsubmit="commitInquirySubmission(event)" class="space-y-4 text-xs font-bold text-slate-500">
+                            <div>
+                                <label class="block mb-1">Subject Title</label>
+                                <input id="inquiry-subject" type="text" required placeholder="e.g. Booking reschedule request" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block mb-1">Detailed Message</label>
+                                <textarea id="inquiry-message" rows="5" required placeholder="Please provide specific details..." class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500 resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"><i data-lucide="send" class="w-4 h-4"></i> Transmit Inquiry</button>
+                        </form>
+                    </div>
+                    <!-- Past History Column -->
+                    <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="history" class="text-indigo-600"></i> Ticket History Log</h3>
+                        <div class="overflow-x-auto max-h-[400px] custom-scrollbar">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-100 text-slate-400 font-bold">
+                                        <th class="py-2.5 text-slate-400 font-bold">Date</th>
+                                        <th class="py-2.5 text-slate-400 font-bold">Subject</th>
+                                        <th class="py-2.5 text-slate-400 font-bold">Message Summary</th>
+                                        <th class="py-2.5 text-slate-400 font-bold">Status</th>
+                                        <th class="py-2.5 text-right text-slate-400 font-bold">Replies</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shared-inquiries-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                    <!-- Dynamic rows rendering -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-admin-inquiries" class="domain-view-pane hidden space-y-6">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="help-circle" class="text-indigo-600"></i> Unified Support Tickets Dashboard</h2>
+                    <p class="text-xs text-slate-400">Review, filter, and resolve inquiries submitted by both students and educators across the platform.</p>
+                </div>
+                <!-- Telemetry Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Received Tickets</p>
+                        <h3 id="admin-inq-stat-total" class="text-xl font-black text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-indigo-500/80 uppercase tracking-wider">Pending Tickets</p>
+                        <h3 id="admin-inq-stat-pending" class="text-xl font-black text-indigo-700 mt-1">0</h3>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-amber-500/80 uppercase tracking-wider">In-Progress Tickets</p>
+                        <h3 id="admin-inq-stat-progress" class="text-xl font-black text-amber-600 mt-1">0</h3>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-sm">
+                        <p class="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wider">Resolved Tickets</p>
+                        <h3 id="admin-inq-stat-resolved" class="text-xl font-black text-emerald-700 mt-1">0</h3>
+                    </div>
+                </div>
+                <!-- Dashboard Filters & Content Table -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-2 justify-between items-center pb-2 border-b">
+                        <h3 class="text-sm font-black text-slate-900">Active Support Inbox</h3>
+                        <div class="flex gap-2 items-center">
+                            <select id="admin-inq-role-filter" onchange="renderAdminInquiryTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none">
+                                <option value="">All Roles</option>
+                                <option value="student">Students</option>
+                                <option value="teacher">Teachers</option>
+                            </select>
+                            <select id="admin-inq-status-filter" onchange="renderAdminInquiryTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none">
+                                <option value="">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In-Progress</option>
+                                <option value="resolved">Resolved</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b text-slate-400 font-bold">
+                                    <th class="py-2.5 text-slate-400 font-bold">Date</th>
+                                    <th class="py-2.5 text-slate-400 font-bold">User</th>
+                                    <th class="py-2.5 text-slate-400 font-bold">Role</th>
+                                    <th class="py-2.5 text-slate-400 font-bold">Subject</th>
+                                    <th class="py-2.5 text-slate-400 font-bold">Status</th>
+                                    <th class="py-2.5 text-right text-slate-400 font-bold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-inquiries-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                <!-- Dynamic rows rendering -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -823,6 +929,52 @@
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeAddTeacherModal()" class="w-1/2 border py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 text-slate-700">Cancel</button>
                     <button type="submit" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/10"><i data-lucide="user-plus" class="w-4 h-4"></i> Create Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-admin-inquiry-reply" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-base font-black text-slate-900 tracking-tight">Support Ticket Response</h3>
+                    <p class="text-xs text-slate-400">Review message and compose an administrative support response.</p>
+                </div>
+                <button onclick="closeAdminInquiryReplyModal()" class="text-slate-400 hover:text-slate-600 p-1.5 bg-slate-50 border rounded-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="space-y-2.5 text-xs text-slate-600 leading-relaxed max-h-[30vh] overflow-y-auto custom-scrollbar bg-slate-50 p-3 rounded-xl border border-slate-100 font-medium">
+                <div>
+                    <span class="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Submitted By</span>
+                    <span id="modal-inq-user-meta" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="pt-1.5">
+                    <span class="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Subject</span>
+                    <span id="modal-inq-subject" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="pt-1.5">
+                    <span class="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Message Details</span>
+                    <p id="modal-inq-message" class="text-slate-700 mt-0.5 font-normal">-</p>
+                </div>
+            </div>
+            <hr class="border-slate-100">
+            <form id="admin-inquiry-reply-form" onsubmit="submitAdminInquiryReply(event)" class="space-y-3 text-xs font-bold text-slate-500">
+                <input type="hidden" id="reply-target-inquiry-id">
+                <div>
+                    <label class="block mb-1">Set Ticket Status</label>
+                    <select id="reply-inq-status" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                        <option value="pending">Pending Review</option>
+                        <option value="in-progress">In-Progress</option>
+                        <option value="resolved">Resolved / Closed</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1">Admin Response Reply Message</label>
+                    <textarea id="reply-inq-comment" rows="4" placeholder="Type your response to the user here..." class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500 resize-none"></textarea>
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="closeAdminInquiryReplyModal()" class="w-1/3 border py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 text-slate-700">Cancel</button>
+                    <button type="submit" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/10"><i data-lucide="check-circle" class="w-4 h-4"></i> Submit Response</button>
                 </div>
             </form>
         </div>
