@@ -717,6 +717,42 @@ function renderTeacherDynamicSlotsMatrix() {
     t.slots.forEach(s => {
         body.innerHTML += `<tr><td class="py-2.5 font-bold">${s.day}</td><td class="py-2.5 font-mono">${s.time_window}</td><td><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px]">${s.location}</span></td><td class="text-right"><button onclick="purgeTeacherSingleSlot('${t.id}','${s.id}')" class="text-rose-600 font-bold">Revoke</button></td></tr>`;
     });
+
+    // Populate profile inputs if they exist in DOM
+    const degreeInput = document.getElementById('teacher-profile-degree');
+    if (degreeInput) {
+        degreeInput.value = t.degree || '';
+        document.getElementById('teacher-profile-exp').value = t.expYears || 0;
+        document.getElementById('teacher-profile-subject').value = t.subject || '';
+        document.getElementById('teacher-profile-std').value = t.standard || '';
+        document.getElementById('teacher-profile-board').value = t.board || '';
+        document.getElementById('teacher-profile-cost').value = t.cost || 0;
+    }
+}
+
+async function updateTeacherProfileDetails(event) {
+    event.preventDefault();
+    const t = teachersProfileRegistry.find(x => x.userId === activeAuthenticatedUser.id);
+    if (!t) return;
+
+    const degree = document.getElementById('teacher-profile-degree').value;
+    const expYears = parseInt(document.getElementById('teacher-profile-exp').value, 10);
+    const subject = document.getElementById('teacher-profile-subject').value;
+    const standard = document.getElementById('teacher-profile-std').value;
+    const board = document.getElementById('teacher-profile-board').value;
+    const cost = parseFloat(document.getElementById('teacher-profile-cost').value);
+
+    try {
+        await apiFetch(`/teachers/${t.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ degree, expYears, subject, standard, board, cost })
+        });
+        triggerNotificationToast("Faculty profile settings updated successfully.", "success");
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function purgeTeacherSingleSlot(tId, sId) {

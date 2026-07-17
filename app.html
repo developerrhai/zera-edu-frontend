@@ -186,6 +186,44 @@
 
                     <div class="lg:col-span-2 space-y-4">
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="user" class="text-indigo-600"></i> Faculty Profile Settings</h3>
+                            <p class="text-xs text-slate-400">View and update your educator credentials, specialization, and hourly rates.</p>
+                            <form id="teacher-profile-form" onsubmit="updateTeacherProfileDetails(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-bold text-slate-500">
+                                <div>
+                                    <label class="block mb-1">Degree / Certification</label>
+                                    <input id="teacher-profile-degree" type="text" placeholder="e.g. M.Sc. Mathematics (IIT Bombay)" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Years of Experience</label>
+                                    <input id="teacher-profile-exp" type="number" min="0" placeholder="e.g. 5" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Subject Specialization</label>
+                                    <input id="teacher-profile-subject" type="text" placeholder="e.g. Mathematics" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Grade / Standard Level</label>
+                                    <select id="teacher-profile-std" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                        <option value="">Select Grade</option>
+                                        <option value="Grade 10">Grade 10</option>
+                                        <option value="Grade 12">Grade 12</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Education Board</label>
+                                    <input id="teacher-profile-board" type="text" placeholder="e.g. CBSE / ICSE" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Cost Per Hour (INR)</label>
+                                    <input id="teacher-profile-cost" type="number" min="0" placeholder="e.g. 500" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                </div>
+                                <div class="md:col-span-2 flex justify-end">
+                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-md transition-all">Save Profile Settings</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                             <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="video" class="text-indigo-600"></i> Faculty Media Portfolio Node</h3>
                             <p class="text-xs text-slate-400">Provide a validated external YouTube video string to expose sandbox preview options to student indexes.</p>
                             <div class="flex gap-2 text-xs">
