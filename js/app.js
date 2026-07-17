@@ -65,8 +65,36 @@ function assignActiveScopeRole(role) {
     else emailInput.value = "kabir@zeraedu.com";
 }
 
-function displayRecoveryWorkflow() { document.getElementById('recovery-overlay-pane').classList.replace('hidden', 'flex'); }
-function dismissRecoveryWorkflow() { document.getElementById('recovery-overlay-pane').classList.replace('flex', 'hidden'); }
+let recoveryEmail = '';
+let recoveryOtpToken = '';
+let recoveryResetToken = '';
+
+function displayRecoveryWorkflow() {
+    recoveryEmail = '';
+    recoveryOtpToken = '';
+    recoveryResetToken = '';
+    document.getElementById('recovery-target-email').value = '';
+    document.getElementById('recovery-otp').value = '';
+    document.getElementById('recovery-new-password').value = '';
+    
+    document.getElementById('recovery-step-1').classList.remove('hidden');
+    document.getElementById('recovery-step-2').classList.add('hidden');
+    document.getElementById('recovery-step-3').classList.add('hidden');
+    document.getElementById('recovery-subtitle').innerText = "Please follow the secure steps to reset your key.";
+    document.getElementById('recovery-overlay-pane').classList.replace('hidden', 'flex');
+}
+
+function dismissRecoveryWorkflow() {
+    document.getElementById('recovery-overlay-pane').classList.replace('flex', 'hidden');
+}
+
+function resetRecoveryStepTo1() {
+    document.getElementById('recovery-otp').value = '';
+    document.getElementById('recovery-step-1').classList.remove('hidden');
+    document.getElementById('recovery-step-2').classList.add('hidden');
+    document.getElementById('recovery-step-3').classList.add('hidden');
+    document.getElementById('recovery-subtitle').innerText = "Please follow the secure steps to reset your key.";
+}
 
 async function processSystemRecoveryRequest() {
     const email = document.getElementById('recovery-target-email').value;
@@ -78,7 +106,63 @@ async function processSystemRecoveryRequest() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
         });
-        triggerNotificationToast(data.message, "success");
+        
+        recoveryEmail = email;
+        recoveryOtpToken = data.otpToken;
+        triggerNotificationToast(data.message || "OTP sent successfully", "success");
+        
+        // Move to Step 2
+        document.getElementById('recovery-step-1').classList.add('hidden');
+        document.getElementById('recovery-step-2').classList.remove('hidden');
+        document.getElementById('recovery-subtitle').innerText = "Step 2: Enter the 6-digit OTP code sent to your email.";
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function processVerifyOtpRequest() {
+    const otp = document.getElementById('recovery-otp').value;
+    if (!otp || otp.length !== 6) return triggerNotificationToast("Please enter a valid 6-digit OTP code.", "error");
+
+    try {
+        const data = await apiFetch('/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: recoveryEmail,
+                otp,
+                otpToken: recoveryOtpToken
+            })
+        });
+        
+        recoveryResetToken = data.resetToken;
+        triggerNotificationToast(data.message || "OTP verified successfully", "success");
+        
+        // Move to Step 3
+        document.getElementById('recovery-step-2').classList.add('hidden');
+        document.getElementById('recovery-step-3').classList.remove('hidden');
+        document.getElementById('recovery-subtitle').innerText = "Step 3: Specify a new password to access your account.";
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function processPasswordResetSubmit() {
+    const newPassword = document.getElementById('recovery-new-password').value;
+    if (!newPassword || newPassword.length < 6) return triggerNotificationToast("Password must be at least 6 characters.", "error");
+
+    try {
+        const data = await apiFetch('/auth/reset-password-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: recoveryEmail,
+                resetToken: recoveryResetToken,
+                newPassword
+            })
+        });
+        
+        triggerNotificationToast(data.message || "Password updated successfully", "success");
         dismissRecoveryWorkflow();
     } catch (err) {
         console.error(err);

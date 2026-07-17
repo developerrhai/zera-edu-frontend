@@ -60,16 +60,35 @@
                 </button>
             </form>
 
-            <div id="recovery-overlay-pane" class="absolute inset-0 bg-white p-6 hidden flex-col justify-center">
+            <div id="recovery-overlay-pane" class="absolute inset-0 bg-white p-6 hidden flex-col justify-center overflow-y-auto custom-scrollbar">
                 <div class="text-center mb-4">
                     <div class="inline-flex items-center justify-center p-2.5 bg-amber-50 text-amber-600 rounded-xl mb-2"><i data-lucide="key-round" class="w-6 h-6"></i></div>
                     <h3 class="text-lg font-black text-slate-900">Credential Recovery</h3>
-                    <p class="text-xs text-slate-400 mt-1">Provide your verified address node to generate an automatic bypass link.</p>
+                    <p id="recovery-subtitle" class="text-xs text-slate-400 mt-0.5">Please follow the secure steps to reset your key.</p>
                 </div>
-                <div class="space-y-3">
-                    <input id="recovery-target-email" type="email" placeholder="user@zeraedu.com" class="w-full border p-2.5 rounded-xl text-xs outline-none bg-slate-50">
-                    <button onclick="processSystemRecoveryRequest()" class="w-full bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl">Transmit Link</button>
-                    <button onclick="dismissRecoveryWorkflow()" class="w-full text-xs font-bold text-slate-400 hover:text-slate-600 py-1">Return</button>
+
+                <!-- Step 1: Send OTP -->
+                <div id="recovery-step-1" class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Account Identifier Email</label>
+                    <input id="recovery-target-email" type="email" placeholder="user@zeraedu.com" class="w-full border p-2.5 rounded-xl text-xs outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+                    <button onclick="processSystemRecoveryRequest()" class="w-full bg-slate-900 text-white font-bold text-xs py-2.5 rounded-xl transition-all hover:bg-slate-800">Send Recovery OTP</button>
+                    <button onclick="dismissRecoveryWorkflow()" class="w-full text-xs font-bold text-slate-400 hover:text-slate-600 py-1">Return to Login</button>
+                </div>
+
+                <!-- Step 2: Verify OTP -->
+                <div id="recovery-step-2" class="space-y-3 hidden">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">Enter 6-Digit OTP</label>
+                    <input id="recovery-otp" type="text" maxlength="6" placeholder="123456" class="w-full border p-2.5 rounded-xl text-xs font-mono text-center tracking-widest outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+                    <button onclick="processVerifyOtpRequest()" class="w-full bg-indigo-600 text-white font-bold text-xs py-2.5 rounded-xl transition-all hover:bg-indigo-700">Verify Code</button>
+                    <button onclick="resetRecoveryStepTo1()" class="w-full text-xs font-bold text-slate-400 hover:text-slate-600 py-1">Send Again</button>
+                </div>
+
+                <!-- Step 3: New Password -->
+                <div id="recovery-step-3" class="space-y-3 hidden">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">New Security Access Key</label>
+                    <input id="recovery-new-password" type="password" placeholder="Minimum 6 characters" class="w-full border p-2.5 rounded-xl text-xs outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+                    <button onclick="processPasswordResetSubmit()" class="w-full bg-emerald-600 text-white font-bold text-xs py-2.5 rounded-xl transition-all hover:bg-emerald-700">Reset Access Key</button>
+                    <button onclick="dismissRecoveryWorkflow()" class="w-full text-xs font-bold text-slate-400 hover:text-slate-600 py-1">Cancel</button>
                 </div>
             </div>
         </div>
