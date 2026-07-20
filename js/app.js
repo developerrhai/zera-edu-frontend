@@ -280,6 +280,11 @@ function switchWorkspaceRouteView(viewId, activeBtnRef = null) {
         document.querySelectorAll('#sidebar-menu-items button').forEach(b => b.className = "w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all");
         activeBtnRef.className = "w-full flex items-center gap-3 px-3 py-2.5 text-xs font-bold rounded-xl bg-indigo-600 text-white shadow-md transition-all";
     }
+    
+    if (viewId === 'view-admin-notifications') {
+        fetchNotificationHistory();
+    }
+    
     if (window.lucide) {
         window.lucide.createIcons();
     }
@@ -2089,3 +2094,116 @@ function renderActiveSessionsTable() {
     });
 }
 
+
+// --- PUSH NOTIFICATION ADMIN LOGIC ---
+
+function togglePushTargetSpecificId() {
+    const type = document.getElementById('push-target-type').value;
+    const container = document.getElementById('push-target-id-container');
+    const input = document.getElementById('push-target-id');
+    
+    if (type === 'single') {
+        container.classList.remove('hidden');
+        input.setAttribute('required', 'true');
+    } else {
+        container.classList.add('hidden');
+        input.removeAttribute('required');
+    }
+}
+
+async function sendPushNotification(event) {
+    event.preventDefault();
+    
+    const type = document.getElementById('push-target-type').value;
+    const title = document.getElementById('push-title').value;
+    const body = document.getElementById('push-body').value;
+    const targetId = document.getElementById('push-target-id').value;
+    
+    const token = localStorage.getItem('accessToken');
+    if (!token) return triggerNotificationToast('Unauthorized. Session missing.', 'error');
+    
+    let endpoint = 'http://localhost:5000/api/notifications/send-bulk';
+    let payload = { title, body };
+    
+    if (type === 'single') {
+        endpoint = 'http://localhost:5000/api/notifications/send-single';
+        payload.userId = targetId;
+    }
+    
+    try {
+        triggerNotificationToast('Transmitting push broadcast...', 'info');
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Transmission failed.');
+        }
+        
+        triggerNotificationToast(\Success! Sent: \, Failed: \\, 'success');
+        document.getElementById('admin-push-notification-form').reset();
+        togglePushTargetSpecificId();
+        fetchNotificationHistory();
+        
+    } catch (error) {
+        console.error('Push Error:', error);
+        triggerNotificationToast('Error: ' + error.message, 'error');
+    }
+}
+
+async function fetchNotificationHistory() {
+    const tbody = document.getElementById('admin-notifications-table-body');
+    if (!tbody) return;
+    
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    
+    try {
+        const response = await fetch('http://localhost:5000/api/notifications/history', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to fetch history');
+        
+        tbody.innerHTML = '';
+        
+        if (data.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400 font-bold">No dispatch history found.</td></tr>';
+            return;
+        }
+        
+        data.data.forEach(item => {
+            const date = new Date(item.created_at).toLocaleString();
+            let targetLabel = item.target_type.toUpperCase();
+            if (item.target_type === 'single') targetLabel = 'SINGLE (ID: ' + JSON.parse(item.target_criteria).userId + ')';
+            
+            let statusBadge = item.status === 'sent' 
+                ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">SENT</span>' 
+                : '<span class="bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">FAILED</span>';
+                
+            tbody.innerHTML += \
+                <tr>
+                    <td class="py-3">\</td>
+                    <td class="py-3 font-bold text-slate-900">\</td>
+                    <td class="py-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold text-[10px]">\</span></td>
+                    <td class="py-3 text-right font-mono text-[10px]">
+                        <span class="text-emerald-600 font-bold">\</span> / 
+                        <span class="text-rose-600 font-bold">\</span>
+                    </td>
+                    <td class="py-3 text-right">\</td>
+                </tr>
+            \;
+        });
+    } catch (error) {
+        console.error('History Fetch Error:', error);
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-rose-500 font-bold">Failed to load dispatch history.</td></tr>';
+    }
+}
