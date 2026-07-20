@@ -1,5 +1,8 @@
 // Global state objects
 let usersDatabase = [];
+let activeClassSessions = [];
+let activeOTPCountdownInterval = null;
+let currentActiveSession = null;
 let teachersProfileRegistry = [];
 let onboardingPipelineQueue = [];
 let systemActiveBookings = [];
@@ -656,6 +659,28 @@ async function synchronizePlatformStateMatrices() {
         renderAdminCoreControlPanel();
         renderGlobalPaymentsLedger();
 
+        const savedSessions = localStorage.getItem("demoActiveClassSessions");
+        if (savedSessions) {
+            activeClassSessions = JSON.parse(savedSessions);
+        } else {
+            activeClassSessions = [
+                {
+                    id: "sess_1",
+                    studentId: 10,
+                    studentName: "Kabir Mehta",
+                    teacherId: 2,
+                    teacherName: "Prof. Ananya Kulkarni",
+                    subject: "Mathematics",
+                    lectureNumber: 1,
+                    status: "completed",
+                    checkinVerifiedAt: "2026-07-20T09:00:00.000Z",
+                    checkoutVerifiedAt: "2026-07-20T10:30:00.000Z",
+                    createdAt: "2026-07-20T09:00:00.000Z"
+                }
+            ];
+            localStorage.setItem("demoActiveClassSessions", JSON.stringify(activeClassSessions));
+        }
+
         renderAttendanceLog();
         renderAttendanceCalendar();
         renderSubscriptionPlans();
@@ -668,6 +693,7 @@ async function synchronizePlatformStateMatrices() {
             renderAdminInquiryTable();
         }
         renderSharedInquiriesTable();
+        renderClassSessionOTPPanel();
         return;
     }
 
@@ -727,6 +753,15 @@ async function synchronizePlatformStateMatrices() {
             myInquiriesList = inqRes.inquiries;
         }
 
+        // Fetch active class sessions
+        try {
+            const classSessRes = await apiFetch('/attendance/class-sessions');
+            activeClassSessions = classSessRes.sessions;
+        } catch (sessErr) {
+            console.error("Failed to load active class sessions: ", sessErr);
+            activeClassSessions = [];
+        }
+
         renderStudentTeacherDirectoryGrid();
         renderStudentActiveBookingsTable();
         renderTeacherDynamicSlotsMatrix();
@@ -746,6 +781,7 @@ async function synchronizePlatformStateMatrices() {
             renderAdminInquiryTable();
         }
         renderSharedInquiriesTable();
+        renderClassSessionOTPPanel();
     } catch (err) {
         console.error("State synchronization failed: ", err);
     }
@@ -1126,7 +1162,7 @@ function renderSubscriptionPlans() {
                 <div>
                     <span class="text-[9px] bg-indigo-50 text-indigo-600 font-extrabold tracking-widest uppercase px-2 py-0.5 rounded">PRO LEVEL</span>
                     <h4 class="text-base font-black text-slate-900 mt-2">${plan.name}</h4>
-                    <p class="text-xs text-slate-400 mt-1">${plan.features.join(', ')}</p>
+                    <p class="text-xs text-slate-400 mt-1">${Array.isArray(plan.features) ? plan.features.join(', ') : (plan.features || '')}</p>
                 </div>
                 <div class="text-2xl font-black text-indigo-600">₹${plan.price.toLocaleString()} <span class="text-xs text-slate-400 font-medium">/ ${plan.billingCycle}</span></div>
                 <button onclick="commitSubscribeRequest(${plan.id})" ${isActive ? 'disabled' : ''} class="w-full ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-600 text-white'} font-bold text-xs py-2 rounded-xl shadow-md">
@@ -1679,5 +1715,377 @@ async function submitAdminInquiryReply(event) {
     } catch (err) {
         console.error(err);
     }
+}
+
+// ─── OTP-Based Attendance System Functions ───
+
+function renderClassSessionOTPPanel() {
+    const studentCard = document.getElementById('student-class-session-card');
+    const teacherCard = document.getElementById('teacher-class-session-card');
+    const monitorCard = document.getElementById('class-sessions-monitor-card');
+
+    if (!studentCard || !teacherCard || !monitorCard) return;
+
+    // Reset visibility
+    studentCard.classList.add('hidden');
+    teacherCard.classList.add('hidden');
+    monitorCard.classList.add('hidden');
+
+    if (activeAuthenticatedUser.role === 'student') {
+        studentCard.classList.remove('hidden');
+        monitorCard.classList.remove('hidden');
+        
+        // Populate teacher select options
+        const selectEl = document.getElementById('session-teacher-id');
+        if (selectEl) {
+            selectEl.innerHTML = '<option value="">Select Teacher</option>';
+            teachersProfileRegistry.forEach(t => {
+                selectEl.innerHTML += `<option value="${t.userId}">${t.name} (${t.subject})</option>`;
+            });
+        }
+
+        // Restore UI based on current active session if it exists in state
+        const ongoingSession = activeClassSessions.find(s => s.status === 'in-progress' || s.status === 'scheduled');
+        if (ongoingSession) {
+            currentActiveSession = ongoingSession;
+            if (ongoingSession.status === 'scheduled') {
+                document.getElementById('student-session-init-form').classList.add('hidden');
+                document.getElementById('student-otp-display-zone').classList.remove('hidden');
+                document.getElementById('student-session-inprogress-zone').classList.add('hidden');
+                
+                // Show standard countdown if expiry info is present
+                if (ongoingSession.checkinOtpExpiry) {
+                    const expiryTime = new Date(ongoingSession.checkinOtpExpiry).getTime();
+                    const now = Date.now();
+                    const secondsLeft = Math.max(0, Math.floor((expiryTime - now) / 1000));
+                    if (secondsLeft > 0) {
+                        startOTPCountdown(secondsLeft, 'student-otp-timer');
+                    } else {
+                        document.getElementById('student-otp-timer').innerText = "Expired";
+                    }
+                }
+            } else if (ongoingSession.status === 'in-progress') {
+                document.getElementById('student-session-init-form').classList.add('hidden');
+                document.getElementById('student-otp-display-zone').classList.add('hidden');
+                document.getElementById('student-session-inprogress-zone').classList.remove('hidden');
+            }
+        } else {
+            // No active session
+            document.getElementById('student-session-init-form').classList.remove('hidden');
+            document.getElementById('student-otp-display-zone').classList.add('hidden');
+            document.getElementById('student-session-inprogress-zone').classList.add('hidden');
+            if (activeOTPCountdownInterval) {
+                clearInterval(activeOTPCountdownInterval);
+                activeOTPCountdownInterval = null;
+            }
+        }
+    } else if (activeAuthenticatedUser.role === 'teacher') {
+        teacherCard.classList.remove('hidden');
+        monitorCard.classList.remove('hidden');
+
+        // Populate scheduled and in-progress dropdowns
+        const checkinSelect = document.getElementById('teacher-verify-checkin-id');
+        const checkoutSelect = document.getElementById('teacher-verify-checkout-id');
+
+        if (checkinSelect) {
+            checkinSelect.innerHTML = '<option value="">Select Scheduled Session</option>';
+            activeClassSessions.filter(s => s.status === 'scheduled').forEach(s => {
+                checkinSelect.innerHTML += `<option value="${s.id}">${s.studentName} - Lecture #${s.lectureNumber} (${s.subject})</option>`;
+            });
+        }
+        if (checkoutSelect) {
+            checkoutSelect.innerHTML = '<option value="">Select In-Progress Session</option>';
+            activeClassSessions.filter(s => s.status === 'in-progress').forEach(s => {
+                checkoutSelect.innerHTML += `<option value="${s.id}">${s.studentName} - Lecture #${s.lectureNumber} (${s.subject})</option>`;
+            });
+        }
+    }
+
+    renderActiveSessionsTable();
+}
+
+function startOTPCountdown(seconds, elementId) {
+    if (activeOTPCountdownInterval) {
+        clearInterval(activeOTPCountdownInterval);
+    }
+
+    let timeLeft = seconds;
+    const timerEl = document.getElementById(elementId);
+    
+    function updateTimer() {
+        if (timeLeft <= 0) {
+            clearInterval(activeOTPCountdownInterval);
+            if (timerEl) timerEl.innerText = "Expired";
+            return;
+        }
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        if (timerEl) timerEl.innerText = `${m}:${s}`;
+        timeLeft--;
+    }
+
+    updateTimer();
+    activeOTPCountdownInterval = setInterval(updateTimer, 1000);
+}
+
+// Student action: Generate Check-In OTP
+async function handleGenerateCheckInOTP(e) {
+    e.preventDefault();
+    const subject = document.getElementById('session-subject').value;
+    const teacherId = document.getElementById('session-teacher-id').value;
+    const lectureNumber = parseInt(document.getElementById('session-lecture-number').value, 10);
+
+    if (!subject || !teacherId || isNaN(lectureNumber)) {
+        return triggerNotificationToast("Please fill all details.", "error");
+    }
+
+    try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            const mockSession = {
+                id: "sess_" + Date.now(),
+                studentId: 10,
+                studentName: "Kabir Mehta",
+                teacherId: 2,
+                teacherName: teachersProfileRegistry.find(t => t.userId === teacherId || t.userId === Number(teacherId))?.name || "Teacher",
+                subject,
+                lectureNumber,
+                status: "scheduled",
+                checkinOtpExpiry: new Date(Date.now() + 300 * 1000).toISOString(),
+                createdAt: new Date().toISOString()
+            };
+            activeClassSessions.unshift(mockSession);
+            currentActiveSession = mockSession;
+            localStorage.setItem("demoActiveClassSessions", JSON.stringify(activeClassSessions));
+            
+            // Show OTP display
+            document.getElementById('student-session-init-form').classList.add('hidden');
+            document.getElementById('student-otp-display-zone').classList.remove('hidden');
+            document.getElementById('student-otp-value').innerText = "123456";
+            
+            startOTPCountdown(300, 'student-otp-timer');
+            triggerNotificationToast("Demo Mode: OTP Generated (Use 123456 to verify).", "success");
+            renderActiveSessionsTable();
+            return;
+        }
+
+        const data = await apiFetch('/attendance/class-sessions/generate-checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject, teacherId, lectureNumber })
+        });
+
+        triggerNotificationToast("Check-in OTP generated successfully.", "success");
+        await synchronizePlatformStateMatrices();
+        
+        // Show OTP value on screen
+        document.getElementById('student-otp-value').innerText = data.otp;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Student action: Cancel active session
+async function handleCancelActiveSession() {
+    if (!currentActiveSession) return;
+    
+    // Simply reset view on client side, state refresh will fetch correct DB state
+    currentActiveSession = null;
+    document.getElementById('student-session-init-form').classList.remove('hidden');
+    document.getElementById('student-otp-display-zone').classList.add('hidden');
+    document.getElementById('student-session-inprogress-zone').classList.add('hidden');
+    
+    if (activeOTPCountdownInterval) {
+        clearInterval(activeOTPCountdownInterval);
+        activeOTPCountdownInterval = null;
+    }
+    
+    triggerNotificationToast("Session generation canceled.", "info");
+    await synchronizePlatformStateMatrices();
+}
+
+// Student action: Generate Check-Out OTP
+async function handleGenerateCheckOutOTP() {
+    const ongoingSession = activeClassSessions.find(s => s.status === 'in-progress');
+    if (!ongoingSession) {
+        return triggerNotificationToast("No active session in progress found.", "error");
+    }
+
+    try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            // For checkout OTP countdown
+            document.getElementById('student-session-inprogress-zone').classList.add('hidden');
+            document.getElementById('student-otp-display-zone').classList.remove('hidden');
+            document.getElementById('student-otp-label').innerText = "Class Check-Out Code";
+            document.getElementById('student-otp-value').innerText = "654321";
+            
+            startOTPCountdown(600, 'student-otp-timer');
+            triggerNotificationToast("Demo Mode: Checkout OTP Generated (Use 654321 to verify).", "success");
+            return;
+        }
+
+        const data = await apiFetch('/attendance/class-sessions/generate-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: ongoingSession.id })
+        });
+
+        triggerNotificationToast("Check-out OTP generated successfully.", "success");
+        
+        // Render check-out screen
+        document.getElementById('student-session-inprogress-zone').classList.add('hidden');
+        document.getElementById('student-otp-display-zone').classList.remove('hidden');
+        document.getElementById('student-otp-label').innerText = "Class Check-Out Code";
+        document.getElementById('student-otp-value').innerText = data.otp;
+        
+        startOTPCountdown(600, 'student-otp-timer');
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Teacher action: Verify Check-In
+async function handleVerifyCheckInOTP(e) {
+    e.preventDefault();
+    const sessionId = document.getElementById('teacher-verify-checkin-id').value;
+    const otp = document.getElementById('teacher-verify-checkin-otp').value;
+
+    if (!sessionId || !otp) {
+        return triggerNotificationToast("Please select session and enter OTP.", "error");
+    }
+
+    try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            const sess = activeClassSessions.find(s => s.id === sessionId);
+            if (sess) {
+                if (otp !== "123456") {
+                    return triggerNotificationToast("Demo Mode: Incorrect OTP. (Use 123456)", "error");
+                }
+                sess.status = 'in-progress';
+                sess.checkinVerifiedAt = new Date().toISOString();
+                localStorage.setItem("demoActiveClassSessions", JSON.stringify(activeClassSessions));
+                triggerNotificationToast("Demo Mode: Check-in verified. Class starts!", "success");
+                document.getElementById('teacher-verify-checkin-otp').value = '';
+                await synchronizePlatformStateMatrices();
+            }
+            return;
+        }
+
+        await apiFetch('/attendance/class-sessions/verify-checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, otp })
+        });
+
+        triggerNotificationToast("Check-in verified successfully. Class in progress!", "success");
+        document.getElementById('teacher-verify-checkin-otp').value = '';
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Teacher action: Verify Check-Out
+async function handleVerifyCheckOutOTP(e) {
+    e.preventDefault();
+    const sessionId = document.getElementById('teacher-verify-checkout-id').value;
+    const otp = document.getElementById('teacher-verify-checkout-otp').value;
+
+    if (!sessionId || !otp) {
+        return triggerNotificationToast("Please select session and enter OTP.", "error");
+    }
+
+    try {
+        if (localStorage.getItem("isDemoMode") === "true") {
+            const sess = activeClassSessions.find(s => s.id === sessionId);
+            if (sess) {
+                if (otp !== "654321") {
+                    return triggerNotificationToast("Demo Mode: Incorrect OTP. (Use 654321)", "error");
+                }
+                sess.status = 'completed';
+                sess.checkoutVerifiedAt = new Date().toISOString();
+                
+                // Add mock attendance record
+                systemAttendanceRecords.unshift({
+                    id: Date.now(),
+                    studentName: sess.studentName,
+                    teacherName: sess.teacherName,
+                    date: new Date().toISOString().split('T')[0],
+                    status: "Present",
+                    remarks: `In-person attendance. Lecture #${sess.lectureNumber}. Subject: ${sess.subject}. Status: COMPLETED`
+                });
+
+                localStorage.setItem("demoActiveClassSessions", JSON.stringify(activeClassSessions));
+                triggerNotificationToast("Demo Mode: Check-out verified. Attendance logged!", "success");
+                document.getElementById('teacher-verify-checkout-otp').value = '';
+                await synchronizePlatformStateMatrices();
+            }
+            return;
+        }
+
+        const data = await apiFetch('/attendance/class-sessions/verify-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, otp })
+        });
+
+        if (data.warning) {
+            triggerNotificationToast(data.warning, "warning");
+        } else {
+            triggerNotificationToast("Check-out verified successfully. Class completed and attendance logged!", "success");
+        }
+        document.getElementById('teacher-verify-checkout-otp').value = '';
+        await synchronizePlatformStateMatrices();
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Renders class sessions table
+function renderActiveSessionsTable() {
+    const tableBody = document.getElementById('class-sessions-rendering-table');
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+
+    const partnerHeader = document.getElementById('session-partner-header');
+    if (partnerHeader) {
+        partnerHeader.innerText = activeAuthenticatedUser.role === 'student' ? 'Teacher' : 'Student';
+    }
+
+    if (activeClassSessions.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-4 text-center text-slate-400 font-bold">
+                    No in-person lectures logged for today.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    activeClassSessions.forEach(s => {
+        let badgeClass = "bg-amber-100 text-amber-800";
+        if (s.status === "completed") badgeClass = "bg-green-100 text-green-800";
+        if (s.status === "in-progress") badgeClass = "bg-blue-100 text-blue-800";
+        if (s.status === "auto-completed") badgeClass = "bg-red-100 text-red-800";
+
+        const partnerName = activeAuthenticatedUser.role === 'student' ? s.teacherName : s.studentName;
+        const checkinTimeStr = s.checkinVerifiedAt ? new Date(s.checkinVerifiedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--';
+        const checkoutTimeStr = s.checkoutVerifiedAt ? new Date(s.checkoutVerifiedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--';
+
+        tableBody.innerHTML += `
+            <tr class="text-xs border-b">
+                <td class="py-3 font-bold text-slate-900">${s.subject}</td>
+                <td class="py-3">Lec ${s.lectureNumber}</td>
+                <td class="py-3">${partnerName}</td>
+                <td class="py-3 font-mono">${checkinTimeStr}</td>
+                <td class="py-3 font-mono">${checkoutTimeStr}</td>
+                <td class="py-3 text-right">
+                    <span class="px-2 py-0.5 rounded-full font-black text-[10px] uppercase ${badgeClass}">
+                        ${s.status}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
 }
 

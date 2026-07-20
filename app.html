@@ -345,6 +345,154 @@
         </div>
     </div>
 
+    <!-- Student In-Person Class OTP Control Card (Student only) -->
+    <div id="student-class-session-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hidden">
+        <div class="flex items-center justify-between border-b pb-3">
+            <h4 class="font-black text-slate-800 flex items-center gap-2">
+                <i data-lucide="home" class="text-indigo-600 w-5 h-5"></i> In-Person Home Class Check-in
+            </h4>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">Student Interface</span>
+        </div>
+        
+        <!-- Step 1: Initiate session form -->
+        <div id="student-session-init-form" class="space-y-4">
+            <p class="text-xs text-slate-500">Initiate an in-person study session when the teacher arrives at your home. Fill details to generate class start OTP.</p>
+            <form onsubmit="handleGenerateCheckInOTP(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-bold text-slate-500">
+                <div>
+                    <label class="block mb-1">Subject</label>
+                    <input id="session-subject" type="text" required placeholder="e.g. Mathematics" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-850 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block mb-1">Teacher</label>
+                    <select id="session-teacher-id" required class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-855 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1">Lecture Number</label>
+                    <input id="session-lecture-number" type="number" min="1" required placeholder="e.g. 1" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-850 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                </div>
+                <div class="md:col-span-3 flex justify-end">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                        <i data-lucide="play" class="w-4 h-4"></i> Start Class & Generate OTP
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Step 2: OTP Display and Countdown -->
+        <div id="student-otp-display-zone" class="hidden text-center py-6 space-y-4 border rounded-2xl bg-slate-50/50">
+            <div class="space-y-1">
+                <span id="student-otp-label" class="text-xs font-black uppercase tracking-widest text-slate-400">Class Check-In Code</span>
+                <div id="student-otp-value" class="text-4xl font-black text-slate-900 font-mono tracking-[0.3em] select-all">------</div>
+            </div>
+            
+            <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-500">
+                <i data-lucide="clock" class="w-4 h-4 text-indigo-500 animate-pulse"></i>
+                <span>OTP expires in: <span id="student-otp-timer" class="font-mono text-indigo-600">05:00</span></span>
+            </div>
+
+            <p class="text-xs text-slate-400 px-4">Provide this code to your teacher to verify and start the lecture.</p>
+            
+            <div class="pt-2">
+                <button type="button" onclick="handleCancelActiveSession()" class="text-xs font-bold text-rose-600 hover:underline">
+                    Cancel and Start Over
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Class in-progress, generate check-out OTP -->
+        <div id="student-session-inprogress-zone" class="hidden text-center py-6 space-y-4 border rounded-2xl bg-indigo-50/30">
+            <div class="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-full text-indigo-600 mb-1">
+                <i data-lucide="video" class="w-6 h-6 animate-pulse"></i>
+            </div>
+            <h5 class="text-sm font-black text-slate-800">Class is in Progress!</h5>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">Your lecture is ongoing. Once the session ends, click below to generate the checkout OTP for your teacher.</p>
+            
+            <div class="flex justify-center gap-4">
+                <button onclick="handleGenerateCheckOutOTP()" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                    <i data-lucide="square" class="w-4 h-4"></i> Generate Checkout OTP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher In-Person Class OTP Verification Card (Teacher only) -->
+    <div id="teacher-class-session-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hidden">
+        <div class="flex items-center justify-between border-b pb-3">
+            <h4 class="font-black text-slate-800 flex items-center gap-2">
+                <i data-lucide="key-round" class="text-indigo-600 w-5 h-5"></i> Verify Student Attendance OTP
+            </h4>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">Teacher Verification Interface</span>
+        </div>
+
+        <!-- Check-in Verification Form -->
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3">
+                <h5 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 1. Verify Check-In (Class Start)
+                </h5>
+                <p class="text-[11px] text-slate-500">Enter the check-in OTP generated on the student's dashboard to begin the lecture.</p>
+                <form onsubmit="handleVerifyCheckInOTP(event)" class="space-y-3">
+                    <div>
+                        <select id="teacher-verify-checkin-id" required class="w-full border p-2 text-xs rounded-xl bg-white font-bold text-slate-700 outline-none">
+                            <option value="">Select Scheduled Session</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="teacher-verify-checkin-otp" type="text" maxlength="6" required placeholder="Enter OTP" class="border p-2.5 rounded-xl text-xs font-mono text-center tracking-widest outline-none bg-white focus:border-indigo-500 w-2/3">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs px-4 rounded-xl flex-grow shadow-md transition-all">Verify Start</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Check-out Verification Form -->
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3">
+                <h5 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span> 2. Verify Check-Out (Class End)
+                </h5>
+                <p class="text-[11px] text-slate-500">Enter the check-out OTP from the student's dashboard at the end of class to log attendance.</p>
+                <form onsubmit="handleVerifyCheckOutOTP(event)" class="space-y-3">
+                    <div>
+                        <select id="teacher-verify-checkout-id" required class="w-full border p-2 text-xs rounded-xl bg-white font-bold text-slate-700 outline-none">
+                            <option value="">Select In-Progress Session</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="teacher-verify-checkout-otp" type="text" maxlength="6" required placeholder="Enter OTP" class="border p-2.5 rounded-xl text-xs font-mono text-center tracking-widest outline-none bg-white focus:border-indigo-500 w-2/3">
+                        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-4 rounded-xl flex-grow shadow-md transition-all">Verify End</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Class Sessions Monitor Table (Both Student/Teacher) -->
+    <div id="class-sessions-monitor-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3 hidden">
+        <h4 class="font-black text-slate-800 flex items-center gap-2">
+            <i data-lucide="activity" class="text-indigo-600 w-5 h-5"></i> In-Person Lecture Log (Today)
+        </h4>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-bold">
+                        <th class="py-2">Subject</th>
+                        <th class="py-2">Lecture #</th>
+                        <th id="session-partner-header" class="py-2">Teacher/Student</th>
+                        <th class="py-2">Start Time</th>
+                        <th class="py-2">End Time</th>
+                        <th class="py-2 text-right">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="class-sessions-rendering-table" class="divide-y divide-slate-100 font-medium text-slate-700">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
 
     <div class="grid grid-cols-2 md:grid-cols-5 gap-5">
