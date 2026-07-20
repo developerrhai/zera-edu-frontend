@@ -2147,7 +2147,7 @@ async function sendPushNotification(event) {
             throw new Error(data.message || 'Transmission failed.');
         }
         
-        triggerNotificationToast(\Success! Sent: \, Failed: \\, 'success');
+        triggerNotificationToast(`Success! Sent: ${data.data.successCount}, Failed: ${data.data.failureCount}`, 'success');
         document.getElementById('admin-push-notification-form').reset();
         togglePushTargetSpecificId();
         fetchNotificationHistory();
@@ -2189,18 +2189,18 @@ async function fetchNotificationHistory() {
                 ? '<span class="bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">SENT</span>' 
                 : '<span class="bg-rose-100 text-rose-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">FAILED</span>';
                 
-            tbody.innerHTML += \
+            tbody.innerHTML += `
                 <tr>
-                    <td class="py-3">\</td>
-                    <td class="py-3 font-bold text-slate-900">\</td>
-                    <td class="py-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold text-[10px]">\</span></td>
+                    <td class="py-3">${date}</td>
+                    <td class="py-3 font-bold text-slate-900">${item.title}</td>
+                    <td class="py-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold text-[10px]">${targetLabel}</span></td>
                     <td class="py-3 text-right font-mono text-[10px]">
-                        <span class="text-emerald-600 font-bold">\</span> / 
-                        <span class="text-rose-600 font-bold">\</span>
+                        <span class="text-emerald-600 font-bold">${item.success_count}</span> / 
+                        <span class="text-rose-600 font-bold">${item.failure_count}</span>
                     </td>
-                    <td class="py-3 text-right">\</td>
+                    <td class="py-3 text-right">${statusBadge}</td>
                 </tr>
-            \;
+            `;
         });
     } catch (error) {
         console.error('History Fetch Error:', error);
