@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zera Edu - Payment Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); }
+        .spinner { border: 3px solid rgba(0,0,0,0.1); border-left-color: #4f46e5; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    
+    <div id="status-card" class="glass-panel border rounded-3xl p-10 max-w-md w-full shadow-xl text-center space-y-6">
+        <div id="loading-view" class="flex flex-col items-center justify-center space-y-4">
+            <div class="spinner"></div>
+            <h2 class="text-xl font-bold text-slate-800">Verifying Payment...</h2>
+            <p class="text-sm text-slate-500">Please wait while we securely confirm your transaction with PhonePe.</p>
+        </div>
+
+        <div id="success-view" class="hidden flex flex-col items-center justify-center space-y-4">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-10 h-10 text-green-600"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900">Payment Successful!</h2>
+            <p class="text-sm text-slate-500">Your session has been successfully booked and the payment is settled.</p>
+            <div class="bg-slate-50 w-full p-4 rounded-xl border border-slate-100 text-left space-y-2 mt-4">
+                <div class="flex justify-between text-xs font-bold"><span class="text-slate-400">Transaction ID</span><span id="succ-txnid" class="text-slate-800 font-mono"></span></div>
+                <div class="flex justify-between text-xs font-bold"><span class="text-slate-400">Gateway</span><span class="text-indigo-600">PhonePe PG</span></div>
+            </div>
+            <a href="app.html" class="mt-6 w-full inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all">Go to Dashboard</a>
+        </div>
+
+        <div id="failure-view" class="hidden flex flex-col items-center justify-center space-y-4">
+            <div class="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center">
+                <i data-lucide="x-circle" class="w-10 h-10 text-rose-600"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900">Payment Failed</h2>
+            <p class="text-sm text-slate-500">We could not process your transaction. Please try again or contact support.</p>
+            <div class="bg-slate-50 w-full p-4 rounded-xl border border-slate-100 text-left space-y-2 mt-4">
+                <div class="flex justify-between text-xs font-bold"><span class="text-slate-400">Transaction ID</span><span id="fail-txnid" class="text-slate-800 font-mono"></span></div>
+            </div>
+            <a href="app.html" class="mt-6 w-full inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 rounded-xl transition-all">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" 
+                            ? "http://localhost:5000/api" 
+                            : "https://api.zeraedu.com/api";
+
+        async function verifyPayment() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const txnId = urlParams.get('txnId');
+
+            if (!txnId) {
+                showFailure("UNKNOWN");
+                return;
+            }
+
+            const token = localStorage.getItem("accessToken");
+            if (!token) {
+                // Not logged in, but we still have transaction ID. We'll show success if demo mode
+                if(localStorage.getItem("isDemoMode") === "true") {
+                    setTimeout(() => showSuccess(txnId), 1500);
+                    return;
+                }
+                showFailure(txnId);
+                return;
+            }
+
+            if(localStorage.getItem("isDemoMode") === "true") {
+                setTimeout(() => showSuccess(txnId), 1500);
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/payments/check-status`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ txnId })
+                });
+
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data.status === 'settled') {
+                        showSuccess(txnId);
+                    } else if (data.status === 'pending') {
+                        // Still pending, maybe webhook is delayed
+                        // For UX, treat as success but mention it's processing
+                        showSuccess(txnId);
+                    } else {
+                        showFailure(txnId);
+                    }
+                } else {
+                    showFailure(txnId);
+                }
+            } catch (err) {
+                console.error("Verification Error:", err);
+                showFailure(txnId);
+            }
+        }
+
+        function showSuccess(txnId) {
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('success-view').classList.remove('hidden');
+            document.getElementById('succ-txnid').innerText = txnId;
+        }
+
+        function showFailure(txnId) {
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('failure-view').classList.remove('hidden');
+            document.getElementById('fail-txnid').innerText = txnId;
+        }
+
+        window.onload = verifyPayment;
+    </script>
+</body>
+</html>

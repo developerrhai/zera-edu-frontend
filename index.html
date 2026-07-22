@@ -83,11 +83,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Vector Icon Library -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Choices.js for Multi-select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <style>
         html { scroll-behavior: smooth; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        /* Fix Choices.js multiselect text color */
+        .choices__list--dropdown .choices__item { color: #1e293b !important; }
+        .choices__list--dropdown .choices__item--selectable.is-highlighted { background-color: #f1f5f9 !important; color: #1e293b !important; }
+        .choices__item.choices__item--choice { color: #1e293b !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans selection:bg-indigo-600 selection:text-white antialiased custom-scrollbar">
@@ -577,9 +584,8 @@ From verified home tutors and academic guidance to AI-powered learning solutions
             </select>
 
             <!-- 4. Subject (Multiple Selection) -->
-            <!-- Note: For a clean UI in production, attach a JS library (like Select2 or Choices.js) to this field -->
-            <div class="relative group">
-                <select multiple class="w-full p-3 rounded-xl border-none text-slate-900 text-sm outline-none shadow-sm h-[48px] bg-white cursor-pointer appearance-none group-hover:h-auto group-hover:absolute group-hover:z-50" title="Hold Ctrl/Cmd to select multiple">
+            <div class="relative" style="z-index: 10;">
+                <select id="subject-multiselect" multiple class="w-full text-slate-900 text-sm h-[48px]" title="Subjects (Multi-select)">
                     <option value="" disabled>Subjects (Multi-select)</option>
                     <option value="math">Mathematics</option>
                     <option value="science">Science</option>
@@ -589,8 +595,6 @@ From verified home tutors and academic guidance to AI-powered learning solutions
                     <option value="biology">Biology</option>
                     <option value="history">History</option>
                 </select>
-                <!-- Fake dropdown arrow to mimic standard select before hover -->
-                <i data-lucide="chevron-down" class="w-4 h-4 absolute right-3 top-4 text-slate-400 pointer-events-none group-hover:hidden"></i>
             </div>
 
             <!-- 5. Time Slot -->
@@ -722,8 +726,8 @@ From verified home tutors and academic guidance to AI-powered learning solutions
                         
                         </div>
                         <div class="flex gap-2">
-                            <button class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Contact Tutor</button>
-                            <button class="border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">View Profile</button>
+                            <button onclick="window.location.href='app.html'" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Contact Tutor</button>
+                            <button onclick="window.location.href='app.html'" class="border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">View Profile</button>
                         </div>
                     </div>
                 </div>
@@ -743,8 +747,8 @@ From verified home tutors and academic guidance to AI-powered learning solutions
                             
                         </div>
                         <div class="flex gap-2">
-                            <button class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Contact Tutor</button>
-                            <button class="border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">View Profile</button>
+                            <button onclick="window.location.href='app.html'" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Contact Tutor</button>
+                            <button onclick="window.location.href='app.html'" class="border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">View Profile</button>
                         </div>
                     </div>
                 </div>
@@ -763,8 +767,8 @@ From verified home tutors and academic guidance to AI-powered learning solutions
                             <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-rose-500"></i> Baner, Pune</span>
                         </div>
                         <div class="flex gap-2">
-                            <button class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Contact Tutor</button>
-                            <button class="border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">View Profile</button>
+                            <button onclick="window.location.href='app.html'" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Contact Tutor</button>
+                            <button onclick="window.location.href='app.html'" class="border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors">View Profile</button>
                         </div>
                     </div>
                 </div>
@@ -1003,5 +1007,18 @@ From verified home tutors and academic guidance to AI-powered learning solutions
     </footer>
     <script src="js/api.js"></script>
     <script src="js/landing.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const subjectSelect = document.getElementById('subject-multiselect');
+            if (subjectSelect) {
+                new Choices(subjectSelect, {
+                    removeItemButton: true,
+                    placeholderValue: 'Subjects (Multi-select)',
+                    searchPlaceholderValue: 'Search subjects...',
+                    itemSelectText: ''
+                });
+            }
+        });
+    </script>
 </body>
 </html>

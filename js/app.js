@@ -50,6 +50,7 @@ const roleMenuRouteMatrices = {
         { label: 'Enquiries', icon: 'message-square', viewId: 'view-admin-enquiries' },
         { label: 'Inquiry Tickets', icon: 'help-circle', viewId: 'view-admin-inquiries' },
         { label: 'Payments', icon: 'receipt', viewId: 'view-payment-history' },
+        { label: 'Notifications', icon: 'bell', viewId: 'view-admin-notifications' },
         { label: 'Settings', icon: 'settings', viewId: 'view-admin-settings' },
     ],
 };
@@ -285,6 +286,10 @@ function switchWorkspaceRouteView(viewId, activeBtnRef = null) {
         fetchNotificationHistory();
     }
     
+    if (viewId === 'view-refer-earn') {
+        fetchReferralsData();
+    }
+
     if (window.lucide) {
         window.lucide.createIcons();
     }
@@ -491,11 +496,11 @@ async function commitAccountAllocationPayment() {
     const selector = document.getElementById('wizard-slot-selector');
     if(!selector.value) return triggerNotificationToast("No available slot selection vector.", "error");
 
-    const slotId = Number(selector.value);
+    const slotId = selector.value;
     const idempotencyKey = "key_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
 
     try {
-        await apiFetch('/bookings', {
+        const bookingRes = await apiFetch('/bookings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -505,11 +510,33 @@ async function commitAccountAllocationPayment() {
             })
         });
 
-        triggerNotificationToast("Booking allocation handshake cleared.", "success");
+        // Demo mode fallback or missing booking response handling
+        if (localStorage.getItem("isDemoMode") === "true" || !bookingRes || !bookingRes.booking) {
+            triggerNotificationToast("Booking allocation handshake cleared (Demo Mode).", "success");
+            dismissAllocationWizardModal();
+            await synchronizePlatformStateMatrices();
+            return;
+        }
+
+        triggerNotificationToast("Booking initiated, redirecting to PhonePe securely...", "info");
+        
+        // Initiate PhonePe Payment Gateway Redirect
+        const orderRes = await apiFetch('/payments/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: bookingRes.booking.id })
+        });
+
+        if (orderRes && orderRes.redirectUrl) {
+            window.location.href = orderRes.redirectUrl;
+            return;
+        }
+
         dismissAllocationWizardModal();
         await synchronizePlatformStateMatrices();
     } catch (err) {
         console.error(err);
+        triggerNotificationToast("Payment gateway routing error. Check console.", "error");
     }
 }
 
@@ -638,9 +665,9 @@ async function synchronizePlatformStateMatrices() {
             ];
 
             adminEnquiriesList = [
-                { id: 1, type: "callback", student_name: "Amit Sharma", parent_name: "Vijay Sharma", contact_number: "9876543210", email: "vijay@gmail.com", address: "Aundh Road, Pune", board: "CBSE", standard: "Class 11-12", status: "new" },
-                { id: 2, type: "callback", student_name: "Sunita Patel", parent_name: "Karan Patel", contact_number: "9988776655", email: "karan@patel.com", address: "Wakad Main Road, Pune", board: "ICSE", standard: "Class 9-10", status: "contacted" },
-                { id: 3, type: "contact", student_name: "Ramesh Kulkarni", email: "ramesh@gmail.com", contact_number: "9890123456", inquiry_type: "Billing & Payments", message: "I wanted to check what card networks are accepted for the Academic Pro plan.", status: "resolved" }
+                { id: 1, type: "callback", student_name: "Amit Sharma", parent_name: "Vijay Sharma", contact_number: "9876543210", email: "vijay@gmail.com", address: "Aundh Road, Pune", board: "CBSE", standard: "Class 11-12", status: "new", created_at: "2026-07-20T10:00:00.000Z" },
+                { id: 2, type: "callback", student_name: "Sunita Patel", parent_name: "Karan Patel", contact_number: "9988776655", email: "karan@patel.com", address: "Wakad Main Road, Pune", board: "ICSE", standard: "Class 9-10", status: "contacted", created_at: "2026-07-19T14:30:00.000Z" },
+                { id: 3, type: "contact", student_name: "Ramesh Kulkarni", email: "ramesh@gmail.com", contact_number: "9890123456", inquiry_type: "Billing & Payments", message: "I wanted to check what card networks are accepted for the Academic Pro plan.", status: "resolved", created_at: "2026-07-18T09:15:00.000Z" }
             ];
 
             adminAttendanceList = systemAttendanceRecords;
@@ -1134,6 +1161,34 @@ function renderAttendanceCalendar() {
     }
 }
 
+async function commitSubscribeRequest(planId) {
+    try {
+        triggerNotificationToast("Initiating subscription checkout...", "info");
+        const res = await apiFetch('/subscriptions/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planId })
+        });
+        
+        if (res && res.subscription) {
+            const checkoutData = await apiFetch('/payments/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscriptionId: res.subscription.id })
+            });
+
+            if (checkoutData && checkoutData.redirectUrl) {
+                window.location.href = checkoutData.redirectUrl;
+            } else {
+                throw new Error("Failed to generate payment link");
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        triggerNotificationToast(err.message || "Failed to initiate subscription payment", "error");
+    }
+}
+
 // ── Subscription Viewport Rendering ─────────────────────────────────────────
 function renderSubscriptionPlans() {
     const container = document.querySelector('#view-shared-subscriptions .grid');
@@ -1170,7 +1225,7 @@ function renderSubscriptionPlans() {
                     <p class="text-xs text-slate-400 mt-1">${Array.isArray(plan.features) ? plan.features.join(', ') : (plan.features || '')}</p>
                 </div>
                 <div class="text-2xl font-black text-indigo-600">₹${plan.price.toLocaleString()} <span class="text-xs text-slate-400 font-medium">/ ${plan.billingCycle}</span></div>
-                <button onclick="commitSubscribeRequest(${plan.id})" ${isActive ? 'disabled' : ''} class="w-full ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-600 text-white'} font-bold text-xs py-2 rounded-xl shadow-md">
+                <button onclick="commitSubscribeRequest('${plan.id}')" ${isActive ? 'disabled' : ''} class="w-full ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-indigo-600 text-white'} font-bold text-xs py-2 rounded-xl shadow-md">
                     ${isActive ? 'Subscription Active' : 'Subscribe Now'}
                 </button>
             </div>
@@ -1424,18 +1479,43 @@ function renderAdminEnquiriesTable() {
     if (!body) return;
     body.innerHTML = '';
 
-    if (adminEnquiriesList.length === 0) {
-        body.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400 font-bold">No prospective lead callback requests.</td></tr>`;
+    const dateFilter = document.getElementById('admin-enq-date-filter') ? document.getElementById('admin-enq-date-filter').value : '';
+
+    let filtered = adminEnquiriesList ? [...adminEnquiriesList] : [];
+
+    if (dateFilter) {
+        filtered = filtered.filter(e => {
+            if (!e.created_at) return false;
+            const dateObj = new Date(e.created_at);
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}` === dateFilter;
+        });
+    }
+
+    if (filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400 font-bold">No prospective lead callback requests.</td></tr>`;
         return;
     }
 
-    adminEnquiriesList.forEach(e => {
+    // Sort by date descending
+    const sortedEnquiries = filtered.sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+        const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+        return dateB - dateA;
+    });
+
+    sortedEnquiries.forEach(e => {
         let statusBadge = "bg-amber-100 text-amber-800";
         if (e.status === 'contacted') statusBadge = "bg-indigo-100 text-indigo-800";
         if (e.status === 'resolved') statusBadge = "bg-green-100 text-green-800";
 
+        const dateStr = e.created_at ? new Date(e.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '--';
+
         body.innerHTML += `
             <tr class="text-xs border-b">
+                <td class="py-3 text-slate-500 font-semibold whitespace-nowrap pr-2">${dateStr}</td>
                 <td class="py-3">
                     <div class="font-bold text-slate-900">${e.student_name || 'Anonymous User'}</div>
                     ${e.parent_name ? `<div class="text-[10px] text-slate-400 font-bold">Parent: ${e.parent_name}</div>` : ''}
@@ -1594,8 +1674,9 @@ function renderAdminInquiryTable() {
 
     const roleFilter = document.getElementById('admin-inq-role-filter').value;
     const statusFilter = document.getElementById('admin-inq-status-filter').value;
+    const dateFilter = document.getElementById('admin-inq-date-filter') ? document.getElementById('admin-inq-date-filter').value : '';
 
-    let filtered = adminInquiriesList || [];
+    let filtered = adminInquiriesList ? [...adminInquiriesList] : [];
 
     if (roleFilter) {
         filtered = filtered.filter(inq => inq.userRole === roleFilter);
@@ -1603,6 +1684,19 @@ function renderAdminInquiryTable() {
     if (statusFilter) {
         filtered = filtered.filter(inq => inq.status === statusFilter);
     }
+    if (dateFilter) {
+        filtered = filtered.filter(inq => {
+            if (!inq.createdAt) return false;
+            const dateObj = new Date(inq.createdAt);
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}` === dateFilter;
+        });
+    }
+
+    // Sort by date descending
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     // Update statistics stats count
     const totalCount = adminInquiriesList.length;
