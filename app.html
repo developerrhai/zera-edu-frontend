@@ -25,15 +25,13 @@
                     <i data-lucide="graduation-cap" class="w-8 h-8"></i>
                 </div>
                 <h1 class="text-2xl font-black tracking-tight text-slate-900">ZERA EDU</h1>
-                <p class="text-xs text-slate-400 font-medium mt-0.5">Enterprise Academic Architecture Hub</p>
+                <p class="text-xs text-slate-400 font-medium mt-0.5">Premium Home Tuition Platform</p>
             </div>
 
             <div id="role-selector-zone" class="mb-4">
-                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Select Domain Authorization Level</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="assignActiveScopeRole('student')" id="chip-role-student" class="role-matrix-chip border-2 border-indigo-600 bg-indigo-50/50 text-indigo-700 py-2 rounded-xl font-bold text-xs flex flex-col items-center gap-1"><i data-lucide="user" class="w-4 h-4"></i>Student</button>
-                    <button onclick="assignActiveScopeRole('teacher')" id="chip-role-teacher" class="role-matrix-chip border border-slate-200 text-slate-500 py-2 rounded-xl font-bold text-xs flex flex-col items-center gap-1"><i data-lucide="briefcase" class="w-4 h-4"></i>Teacher</button>
-                    <button onclick="assignActiveScopeRole('admin')" id="chip-role-admin" class="role-matrix-chip border border-slate-200 text-slate-500 py-2 rounded-xl font-bold text-xs flex flex-col items-center gap-1"><i data-lucide="shield" class="w-4 h-4"></i>Admin</button>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Domain Authorization</label>
+                <div class="grid grid-cols-1 gap-2">
+                    <button onclick="assignActiveScopeRole('student')" id="chip-role-student" class="role-matrix-chip border-2 border-indigo-600 bg-indigo-50/50 text-indigo-700 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-2"><i data-lucide="user" class="w-4 h-4"></i>Student Portal Login</button>
                 </div>
             </div>
 
@@ -114,7 +112,8 @@
             </div>
 
             <nav id="sidebar-menu-items" class="p-4 space-y-1 flex-grow">
-                </nav>
+                <!-- Dynamically Populated by JS -->
+            </nav>
 
             <div class="p-4 border-t border-slate-800 bg-slate-950/20">
                 <button onclick="executeEcosystemSignout()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
@@ -127,8 +126,8 @@
             
             <div id="view-student-teachers" class="domain-view-pane hidden space-y-6">
                 <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="search" class="text-indigo-600"></i> Parametric Faculty Registry</h2>
-                    <p class="text-xs text-slate-400">Search with filters across standards, schedules, locations, and academic boards.</p>
+                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="search" class="text-indigo-600"></i> Home Tuition Search & Booking</h2>
+                    <p class="text-xs text-slate-500 mt-1">Search and book verified local tutors for individual lectures. <strong class="text-indigo-600">Platform access requires an active subscription. Students only pay for per-lecture home tuition.</strong></p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
@@ -156,7 +155,8 @@
                 </div>
 
                 <div id="faculty-cards-discovery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    </div>
+                    <!-- Populated via JS -->
+                </div>
             </div>
 
             <div id="view-student-profile" class="domain-view-pane hidden space-y-6">
@@ -169,497 +169,283 @@
                 </div>
             </div>
 
-            <div id="view-teacher-slots" class="domain-view-pane hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="space-y-4">
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="map-pin" class="text-indigo-600"></i> Geolocation Service Radius</h3>
-                            <p class="text-xs text-slate-400">Configure your deployment perimeter for offline face-to-face modules.</p>
-                            <div class="space-y-3 pt-1">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">Target Boundary Restriction</label>
-                                    <select id="teacher-map-radius" onchange="updateTeacherMappingRadius()" class="w-full text-xs font-bold border bg-slate-50 p-2.5 rounded-xl outline-none">
-                                        <option value="3">3 Kilometers Radial Perimeter Range</option>
-                                        <option value="5" selected>5 Kilometers Radial Perimeter Range</option>
-                                        <option value="10">10 Kilometers Radial Perimeter Range</option>
-                                    </select>
-                                </div>
-                                <div class="bg-slate-100 rounded-xl p-3 border border-slate-200 text-center flex flex-col items-center justify-center min-h-[110px] relative overflow-hidden">
-                                    <i data-lucide="map" class="w-8 h-8 text-indigo-400 animate-pulse mb-1"></i>
-                                    <span class="text-[10px] font-mono text-slate-500 font-bold tracking-tight">VIRTUAL GOOGLE MAPS API SIMULATION</span>
-                                    <span id="map-api-radius-indicator" class="text-[9px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-black mt-1">RADIUS: 5KM SYNCED</span>
-                                </div>
+            <div id="view-shared-attendance" class="domain-view-pane hidden space-y-6">
+
+                <!-- Header -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">
+                                <i data-lucide="calendar-check-2" class="text-indigo-600"></i>
+                                Student Attendance Dashboard
+                            </h3>
+                            <p class="text-sm text-slate-500 mt-1">
+                                Attendance verified through Mobile App OTP Authentication.
+                            </p>
+                        </div>
+
+                        <button
+                            id="openCalendarBtn"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold">
+                            <i data-lucide="calendar"></i>
+                            View Calendar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Student Information -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <h4 class="font-black text-slate-800 mb-5">Student Details</h4>
+
+                    <div class="grid md:grid-cols-4 gap-4 text-sm">
+
+                        <div>
+                            <label class="text-slate-500">Student Name</label>
+                            <div class="font-bold text-slate-800">Kabir Mehta</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Student ID</label>
+                            <div class="font-bold">AF20261054</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Course</label>
+                            <div class="font-bold">Foundation</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Batch</label>
+                            <div class="font-bold">Morning Batch A</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Branch</label>
+                            <div class="font-bold">Pune</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Academic Year</label>
+                            <div class="font-bold">2026-27</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Mobile</label>
+                            <div class="font-bold">9876543210</div>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-500">Attendance %</label>
+                            <div class="font-bold text-green-600">92%</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Student In-Person Class OTP Control Card (Student only) -->
+                <div id="student-class-session-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hidden">
+                    <div class="flex items-center justify-between border-b pb-3">
+                        <h4 class="font-black text-slate-800 flex items-center gap-2">
+                            <i data-lucide="home" class="text-indigo-600 w-5 h-5"></i> In-Person Home Class Check-in
+                        </h4>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">Student Interface</span>
+                    </div>
+                    
+                    <!-- Step 1: Initiate session form -->
+                    <div id="student-session-init-form" class="space-y-4">
+                        <p class="text-xs text-slate-500">Initiate an in-person study session when the tutor arrives at your home. Fill details to generate class start OTP.</p>
+                        <form onsubmit="handleGenerateCheckInOTP(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-bold text-slate-500">
+                            <div>
+                                <label class="block mb-1">Subject</label>
+                                <input id="session-subject" type="text" required placeholder="e.g. Mathematics" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-850 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block mb-1">Tutor</label>
+                                <select id="session-teacher-id" required class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-855 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block mb-1">Lecture Number</label>
+                                <input id="session-lecture-number" type="number" min="1" required placeholder="e.g. 1" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-850 font-medium outline-none focus:bg-white focus:border-indigo-500">
+                            </div>
+                            <div class="md:col-span-3 flex justify-end">
+                                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                                    <i data-lucide="play" class="w-4 h-4"></i> Start Class & Generate OTP
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: OTP Display and Countdown -->
+                    <div id="student-otp-display-zone" class="hidden text-center py-6 space-y-4 border rounded-2xl bg-slate-50/50">
+                        <div class="space-y-1">
+                            <span id="student-otp-label" class="text-xs font-black uppercase tracking-widest text-slate-400">Class Check-In Code</span>
+                            <div id="student-otp-value" class="text-4xl font-black text-slate-900 font-mono tracking-[0.3em] select-all">------</div>
+                        </div>
+                        
+                        <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-500">
+                            <i data-lucide="clock" class="w-4 h-4 text-indigo-500 animate-pulse"></i>
+                            <span>OTP expires in: <span id="student-otp-timer" class="font-mono text-indigo-600">05:00</span></span>
+                        </div>
+
+                        <p class="text-xs text-slate-400 px-4">Provide this code to your tutor to verify and start the lecture.</p>
+                        
+                        <div class="pt-2">
+                            <button type="button" onclick="handleCancelActiveSession()" class="text-xs font-bold text-rose-600 hover:underline">
+                                Cancel and Start Over
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Class in-progress, generate check-out OTP -->
+                    <div id="student-session-inprogress-zone" class="hidden text-center py-6 space-y-4 border rounded-2xl bg-indigo-50/30">
+                        <div class="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-full text-indigo-600 mb-1">
+                            <i data-lucide="video" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                        <h5 class="text-sm font-black text-slate-800">Class is in Progress!</h5>
+                        <p class="text-xs text-slate-500 max-w-md mx-auto">Your lecture is ongoing. Once the session ends, click below to generate the checkout OTP for your tutor.</p>
+                        
+                        <div class="flex justify-center gap-4">
+                            <button onclick="handleGenerateCheckOutOTP()" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                                <i data-lucide="square" class="w-4 h-4"></i> Generate Checkout OTP
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Class Sessions Monitor Table -->
+                <div id="class-sessions-monitor-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3 hidden">
+                    <h4 class="font-black text-slate-800 flex items-center gap-2">
+                        <i data-lucide="activity" class="text-indigo-600 w-5 h-5"></i> In-Person Lecture Log (Today)
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 font-bold">
+                                    <th class="py-2">Subject</th>
+                                    <th class="py-2">Lecture #</th>
+                                    <th id="session-partner-header" class="py-2">Tutor Name</th>
+                                    <th class="py-2">Start Time</th>
+                                    <th class="py-2">End Time</th>
+                                    <th class="py-2 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="class-sessions-rendering-table" class="divide-y divide-slate-100 font-medium text-slate-700">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-5">
+                    <div class="bg-indigo-50 rounded-2xl p-5 border">
+                        <div class="text-xs text-slate-500">Total Lectures</div>
+                        <div class="text-3xl font-black text-indigo-700 mt-2">120</div>
+                    </div>
+                    <div class="bg-green-50 rounded-2xl p-5 border">
+                        <div class="text-xs text-slate-500">Present</div>
+                        <div class="text-3xl font-black text-green-700 mt-2">110</div>
+                    </div>
+                    <div class="bg-red-50 rounded-2xl p-5 border">
+                        <div class="text-xs text-slate-500">Absent / Missed</div>
+                        <div class="text-3xl font-black text-red-700 mt-2">5</div>
+                    </div>
+                    <div class="bg-yellow-50 rounded-2xl p-5 border">
+                        <div class="text-xs text-slate-500">Pending Attendance</div>
+                        <div class="text-3xl font-black text-yellow-600 mt-2">3</div>
+                    </div>
+                    <div class="bg-cyan-50 rounded-2xl p-5 border">
+                        <div class="text-xs text-slate-500">Attendance %</div>
+                        <div class="text-3xl font-black text-cyan-700 mt-2">92%</div>
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-black text-slate-800">Attendance Calendar</h4>
+                        <div class="flex gap-3 text-xs">
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                                Present
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-3 bg-red-500 rounded-full"></span>
+                                Absent
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
+                                Pending
                             </div>
                         </div>
-
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="calendar-plus" class="text-emerald-600"></i> Dispatch New Slot Node</h3>
-                            <form id="slot-creation-form" onsubmit="handleTeacherSlotAddition(event)" class="space-y-3 text-xs font-bold text-slate-500">
-                                <div><label class="block mb-1">Target Day</label><select id="slot-day" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium"><option>Monday</option><option>Tuesday</option><option>Wednesday</option></select></div>
-                                <div><label class="block mb-1">Time Block Schedule Window</label><input id="slot-time" type="text" required placeholder="04:00 PM - 06:00 PM" class="w-full border p-2.5 rounded-xl bg-slate-50 font-medium text-slate-800"></div>
-                                <div><label class="block mb-1">Logistics Delivery Location</label><select id="slot-loc" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium"><option>Online Virtual</option><option>Offline Center</option></select></div>
-                                <button type="submit" class="w-full bg-emerald-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i> Commit Slot Structure</button>
-                            </form>
-                        </div>
                     </div>
+                    <div id="attendance-calendar" class="mt-5"></div>
+                </div>
 
-                    <div class="lg:col-span-2 space-y-4">
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="user" class="text-indigo-600"></i> Faculty Profile Settings</h3>
-                            <p class="text-xs text-slate-400">View and update your educator credentials, specialization, and hourly rates.</p>
-                            <form id="teacher-profile-form" onsubmit="updateTeacherProfileDetails(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-bold text-slate-500">
-                                <div>
-                                    <label class="block mb-1">Degree / Certification</label>
-                                    <input id="teacher-profile-degree" type="text" placeholder="e.g. M.Sc. Mathematics (IIT Bombay)" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block mb-1">Years of Experience</label>
-                                    <input id="teacher-profile-exp" type="number" min="0" placeholder="e.g. 5" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block mb-1">Subject Specialization</label>
-                                    <input id="teacher-profile-subject" type="text" placeholder="e.g. Mathematics" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block mb-1">Grade / Standard Level</label>
-                                    <select id="teacher-profile-std" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                                        <option value="">Select Grade</option>
-                                        <option value="Grade 10">Grade 10</option>
-                                        <option value="Grade 12">Grade 12</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block mb-1">Education Board</label>
-                                    <input id="teacher-profile-board" type="text" placeholder="e.g. CBSE / ICSE" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block mb-1">Cost Per Hour (INR)</label>
-                                    <input id="teacher-profile-cost" type="number" min="0" placeholder="e.g. 500" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                                </div>
-                                <div class="md:col-span-2 flex justify-end">
-                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-md transition-all">Save Profile Settings</button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="video" class="text-indigo-600"></i> Faculty Media Portfolio Node</h3>
-                            <p class="text-xs text-slate-400">Provide a validated external YouTube video string to expose sandbox preview options to student indexes.</p>
-                            <div class="flex gap-2 text-xs">
-                                <input id="teacher-yt-link" type="text" placeholder="https://www.youtube.com/embed/dQw4w9WgXcQ" value="https://www.youtube.com/embed/dQw4w9WgXcQ" class="bg-slate-50 border p-2.5 rounded-xl font-mono flex-grow outline-none text-slate-700 font-bold">
-                                <button onclick="saveTeacherYoutubeMediaAnchor()" class="bg-indigo-600 text-white font-black text-xs px-4 rounded-xl hover:bg-indigo-700 transition-all">Commit Anchor</button>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="calendar" class="text-emerald-600"></i> Operational Slots Matrix</h3>
-                            <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                                <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Day</th><th class="py-2">Time Window</th><th class="py-2">Location Node</th><th class="py-2 text-right">Actions Trigger</th></tr></thead>
-                                <tbody id="teacher-slots-rendering-table" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
-                            </table></div>
-                        </div>
+                <!-- Attendance Register -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <h4 class="font-black text-slate-800 mb-4">
+                        OTP Verified Attendance Register
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="p-3">Date</th>
+                                    <th>Lecture</th>
+                                    <th>Subject</th>
+                                    <th>Tutor</th>
+                                    <th>Check-In Time</th>
+                                    <th>OTP</th>
+                                    <th>Device</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr>
+                                    <td class="p-3">27-Jun-2026</td>
+                                    <td>Lec 24</td>
+                                    <td>Mathematics</td>
+                                    <td>Rahul Sir</td>
+                                    <td>08:59 AM</td>
+                                    <td>
+                                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
+                                            OTP VERIFIED
+                                        </span>
+                                    </td>
+                                    <td>Android App</td>
+                                    <td>
+                                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                                            PRESENT
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3">26-Jun-2026</td>
+                                    <td>Lec 23</td>
+                                    <td>Physics</td>
+                                    <td>Amit Sir</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>--</td>
+                                    <td>
+                                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">
+                                            ABSENT
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <div id="view-teacher-directory" class="domain-view-pane hidden space-y-6">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="text-base font-black text-slate-900 flex items-center gap-2"><i data-lucide="briefcase" class="text-emerald-600"></i> Faculty Engagement Subsystem</h3>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Student Entity Name</th><th class="py-2">Time Slot Parameters</th><th class="py-2">Format Location</th><th class="py-2">Status Flag</th><th class="py-2 text-right">Execution Controls</th></tr></thead>
-                        <tbody id="teacher-bookings-execution-table" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-<div id="view-shared-attendance" class="domain-view-pane hidden space-y-6">
-
-    <!-- Header -->
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-                <h3 class="text-xl font-black text-slate-900 flex items-center gap-2">
-                    <i data-lucide="calendar-check-2" class="text-indigo-600"></i>
-                    Student Attendance Dashboard
-                </h3>
-                <p class="text-sm text-slate-500 mt-1">
-                    Attendance verified through Mobile App OTP Authentication.
-                </p>
-            </div>
-
-            <button
-    id="openCalendarBtn"
-    class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold">
-    <i data-lucide="calendar"></i>
-    View Calendar
-</button>
-        </div>
-    </div>
-
-    <!-- Student Information -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-        <h4 class="font-black text-slate-800 mb-5">Student Details</h4>
-
-        <div class="grid md:grid-cols-4 gap-4 text-sm">
-
-            <div>
-                <label class="text-slate-500">Student Name</label>
-                <div class="font-bold text-slate-800">Kabir Mehta</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Student ID</label>
-                <div class="font-bold">AF20261054</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Course</label>
-                <div class="font-bold">Foundation</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Batch</label>
-                <div class="font-bold">Morning Batch A</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Branch</label>
-                <div class="font-bold">Pune</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Academic Year</label>
-                <div class="font-bold">2026-27</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Mobile</label>
-                <div class="font-bold">9876543210</div>
-            </div>
-
-            <div>
-                <label class="text-slate-500">Attendance %</label>
-                <div class="font-bold text-green-600">92%</div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Student In-Person Class OTP Control Card (Student only) -->
-    <div id="student-class-session-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hidden">
-        <div class="flex items-center justify-between border-b pb-3">
-            <h4 class="font-black text-slate-800 flex items-center gap-2">
-                <i data-lucide="home" class="text-indigo-600 w-5 h-5"></i> In-Person Home Class Check-in
-            </h4>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">Student Interface</span>
-        </div>
-        
-        <!-- Step 1: Initiate session form -->
-        <div id="student-session-init-form" class="space-y-4">
-            <p class="text-xs text-slate-500">Initiate an in-person study session when the teacher arrives at your home. Fill details to generate class start OTP.</p>
-            <form onsubmit="handleGenerateCheckInOTP(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-bold text-slate-500">
-                <div>
-                    <label class="block mb-1">Subject</label>
-                    <input id="session-subject" type="text" required placeholder="e.g. Mathematics" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-850 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block mb-1">Teacher</label>
-                    <select id="session-teacher-id" required class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-855 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-                <div>
-                    <label class="block mb-1">Lecture Number</label>
-                    <input id="session-lecture-number" type="number" min="1" required placeholder="e.g. 1" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-850 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div class="md:col-span-3 flex justify-end">
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5">
-                        <i data-lucide="play" class="w-4 h-4"></i> Start Class & Generate OTP
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Step 2: OTP Display and Countdown -->
-        <div id="student-otp-display-zone" class="hidden text-center py-6 space-y-4 border rounded-2xl bg-slate-50/50">
-            <div class="space-y-1">
-                <span id="student-otp-label" class="text-xs font-black uppercase tracking-widest text-slate-400">Class Check-In Code</span>
-                <div id="student-otp-value" class="text-4xl font-black text-slate-900 font-mono tracking-[0.3em] select-all">------</div>
-            </div>
-            
-            <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-500">
-                <i data-lucide="clock" class="w-4 h-4 text-indigo-500 animate-pulse"></i>
-                <span>OTP expires in: <span id="student-otp-timer" class="font-mono text-indigo-600">05:00</span></span>
-            </div>
-
-            <p class="text-xs text-slate-400 px-4">Provide this code to your teacher to verify and start the lecture.</p>
-            
-            <div class="pt-2">
-                <button type="button" onclick="handleCancelActiveSession()" class="text-xs font-bold text-rose-600 hover:underline">
-                    Cancel and Start Over
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 3: Class in-progress, generate check-out OTP -->
-        <div id="student-session-inprogress-zone" class="hidden text-center py-6 space-y-4 border rounded-2xl bg-indigo-50/30">
-            <div class="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-full text-indigo-600 mb-1">
-                <i data-lucide="video" class="w-6 h-6 animate-pulse"></i>
-            </div>
-            <h5 class="text-sm font-black text-slate-800">Class is in Progress!</h5>
-            <p class="text-xs text-slate-500 max-w-md mx-auto">Your lecture is ongoing. Once the session ends, click below to generate the checkout OTP for your teacher.</p>
-            
-            <div class="flex justify-center gap-4">
-                <button onclick="handleGenerateCheckOutOTP()" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-1.5">
-                    <i data-lucide="square" class="w-4 h-4"></i> Generate Checkout OTP
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Teacher In-Person Class OTP Verification Card (Teacher only) -->
-    <div id="teacher-class-session-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 hidden">
-        <div class="flex items-center justify-between border-b pb-3">
-            <h4 class="font-black text-slate-800 flex items-center gap-2">
-                <i data-lucide="key-round" class="text-indigo-600 w-5 h-5"></i> Verify Student Attendance OTP
-            </h4>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-indigo-50 text-indigo-700">Teacher Verification Interface</span>
-        </div>
-
-        <!-- Check-in Verification Form -->
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3">
-                <h5 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 1. Verify Check-In (Class Start)
-                </h5>
-                <p class="text-[11px] text-slate-500">Enter the check-in OTP generated on the student's dashboard to begin the lecture.</p>
-                <form onsubmit="handleVerifyCheckInOTP(event)" class="space-y-3">
-                    <div>
-                        <select id="teacher-verify-checkin-id" required class="w-full border p-2 text-xs rounded-xl bg-white font-bold text-slate-700 outline-none">
-                            <option value="">Select Scheduled Session</option>
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-                    <div class="flex gap-2">
-                        <input id="teacher-verify-checkin-otp" type="text" maxlength="6" required placeholder="Enter OTP" class="border p-2.5 rounded-xl text-xs font-mono text-center tracking-widest outline-none bg-white focus:border-indigo-500 w-2/3">
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs px-4 rounded-xl flex-grow shadow-md transition-all">Verify Start</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Check-out Verification Form -->
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-3">
-                <h5 class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-rose-500"></span> 2. Verify Check-Out (Class End)
-                </h5>
-                <p class="text-[11px] text-slate-500">Enter the check-out OTP from the student's dashboard at the end of class to log attendance.</p>
-                <form onsubmit="handleVerifyCheckOutOTP(event)" class="space-y-3">
-                    <div>
-                        <select id="teacher-verify-checkout-id" required class="w-full border p-2 text-xs rounded-xl bg-white font-bold text-slate-700 outline-none">
-                            <option value="">Select In-Progress Session</option>
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-                    <div class="flex gap-2">
-                        <input id="teacher-verify-checkout-otp" type="text" maxlength="6" required placeholder="Enter OTP" class="border p-2.5 rounded-xl text-xs font-mono text-center tracking-widest outline-none bg-white focus:border-indigo-500 w-2/3">
-                        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-4 rounded-xl flex-grow shadow-md transition-all">Verify End</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Class Sessions Monitor Table (Both Student/Teacher) -->
-    <div id="class-sessions-monitor-card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-3 hidden">
-        <h4 class="font-black text-slate-800 flex items-center gap-2">
-            <i data-lucide="activity" class="text-indigo-600 w-5 h-5"></i> In-Person Lecture Log (Today)
-        </h4>
-        <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-slate-100 text-slate-400 font-bold">
-                        <th class="py-2">Subject</th>
-                        <th class="py-2">Lecture #</th>
-                        <th id="session-partner-header" class="py-2">Teacher/Student</th>
-                        <th class="py-2">Start Time</th>
-                        <th class="py-2">End Time</th>
-                        <th class="py-2 text-right">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="class-sessions-rendering-table" class="divide-y divide-slate-100 font-medium text-slate-700">
-                    <!-- Populated dynamically -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Summary Cards -->
-
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-5">
-
-        <div class="bg-indigo-50 rounded-2xl p-5 border">
-            <div class="text-xs text-slate-500">Total Lectures</div>
-            <div class="text-3xl font-black text-indigo-700 mt-2">120</div>
-        </div>
-
-        <div class="bg-green-50 rounded-2xl p-5 border">
-            <div class="text-xs text-slate-500">Present</div>
-            <div class="text-3xl font-black text-green-700 mt-2">110</div>
-        </div>
-
-        <div class="bg-red-50 rounded-2xl p-5 border">
-            <div class="text-xs text-slate-500">Absent / Missed</div>
-            <div class="text-3xl font-black text-red-700 mt-2">5</div>
-        </div>
-
-        <div class="bg-yellow-50 rounded-2xl p-5 border">
-            <div class="text-xs text-slate-500">Pending Attendance</div>
-            <div class="text-3xl font-black text-yellow-600 mt-2">3</div>
-        </div>
-
-        <div class="bg-cyan-50 rounded-2xl p-5 border">
-            <div class="text-xs text-slate-500">Attendance %</div>
-            <div class="text-3xl font-black text-cyan-700 mt-2">92%</div>
-        </div>
-
-    </div>
-
-    <!-- Calendar -->
-
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-
-        <div class="flex items-center justify-between mb-4">
-            <h4 class="font-black text-slate-800">Attendance Calendar</h4>
-            
-
-            <div class="flex gap-3 text-xs">
-
-                <div class="flex items-center gap-1">
-                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                    Present
-                </div>
-
-                <div class="flex items-center gap-1">
-                    <span class="w-3 h-3 bg-red-500 rounded-full"></span>
-                    Absent
-                </div>
-
-                <div class="flex items-center gap-1">
-                    <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
-                    Pending
-                </div>
-
-            </div>
-        </div>
-
-        <div id="attendance-calendar" class="mt-5"></div>
-
-    </div>
-
-    <!-- Attendance Register -->
-
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-
-        <h4 class="font-black text-slate-800 mb-4">
-            OTP Verified Attendance Register
-        </h4>
-
-        <div class="overflow-x-auto">
-
-            <table class="w-full text-sm">
-
-                <thead class="bg-slate-100">
-
-                    <tr>
-
-                        <th class="p-3">Date</th>
-
-                        <th>Lecture</th>
-
-                        <th>Subject</th>
-
-                        <th>Faculty</th>
-
-                        <th>Check-In Time</th>
-
-                        <th>OTP</th>
-
-                        <th>Device</th>
-
-                        <th>Status</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody class="divide-y">
-
-                    <tr>
-
-                        <td class="p-3">27-Jun-2026</td>
-
-                        <td>Lec 24</td>
-
-                        <td>Mathematics</td>
-
-                        <td>Rahul Sir</td>
-
-                        <td>08:59 AM</td>
-
-                        <td>
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
-                                OTP VERIFIED
-                            </span>
-                        </td>
-
-                        <td>Android App</td>
-
-                        <td>
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
-                                PRESENT
-                            </span>
-                        </td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td class="p-3">26-Jun-2026</td>
-
-                        <td>Lec 23</td>
-
-                        <td>Physics</td>
-
-                        <td>Amit Sir</td>
-
-                        <td>--</td>
-
-                        <td>--</td>
-
-                        <td>--</td>
-
-                        <td>
-                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">
-                                ABSENT
-                            </span>
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-</div>
 
             <div id="view-shared-subscriptions" class="domain-view-pane hidden space-y-6">
                 <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="zap" class="text-indigo-600"></i> Tier Subscription Infrastructure</h2>
-                    <p class="text-xs text-slate-400">Access platform acceleration mechanics, reduced statutory cess modules, and high-priority matching pipelines.</p>
+                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="zap" class="text-indigo-600"></i> Platform Access Subscriptions</h2>
+                    <p class="text-xs text-slate-500 mt-1">An active subscription is strictly required to use this platform. With an active subscription, students only pay per lecture for home tuition.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white border rounded-2xl p-5 shadow-sm space-y-4 relative overflow-hidden">
@@ -680,231 +466,6 @@
                     </div>
                 </div>
             </div>
-
-            <div id="view-admin-dashboard" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="layout-dashboard" class="text-indigo-600"></i> Platform Administration Hub</h2>
-                    <p class="text-xs text-slate-400">Real-time telemetry and resource analytics overview across global cluster nodes.</p>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Aggregated Billings</p><h3 id="stat-billings" class="text-xl font-black text-slate-800 mt-1">₹0.00</h3></div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Platform Retention Fee (15%)</p><h3 id="stat-revenue" class="text-xl font-black text-indigo-600 mt-1">₹0.00</h3></div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Registered Tutors</p><h3 id="stat-tutors" class="text-xl font-black text-slate-800 mt-1">0 Node</h3></div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Onboarding Queue Count</p><h3 id="stat-queue" class="text-xl font-black text-amber-600 mt-1">0 Node</h3></div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="server" class="text-indigo-600"></i> System Node Diagnostics</h3>
-                        <div class="space-y-2 text-xs font-medium text-slate-600">
-                            <div class="flex justify-between border-b pb-1.5"><span>Database Connection</span><span class="text-emerald-600 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> CONNECTED</span></div>
-                            <div class="flex justify-between border-b pb-1.5"><span>Payment Gateway API</span><span class="text-emerald-600 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> READY</span></div>
-                            <div class="flex justify-between border-b pb-1.5"><span>OTP SMS Service</span><span class="text-emerald-600 font-bold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> ONLINE</span></div>
-                            <div class="flex justify-between"><span>Active Node Version</span><span class="font-mono bg-slate-100 px-2 py-0.5 rounded text-[10px]">v2.6.1-prod</span></div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="activity" class="text-indigo-600"></i> Quick Actions Bypass</h3>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <button onclick="switchWorkspaceRouteView('view-admin-users')" class="bg-slate-900 text-white font-bold py-2 rounded-xl text-center hover:bg-slate-800 transition-colors">Manage Users</button>
-                            <button onclick="switchWorkspaceRouteView('view-admin-onboarding')" class="bg-indigo-600 text-white font-bold py-2 rounded-xl text-center hover:bg-indigo-700 transition-colors">Review Queue</button>
-                            <button onclick="switchWorkspaceRouteView('view-admin-attendance')" class="border font-bold py-2 rounded-xl text-center hover:bg-slate-50 transition-colors text-slate-700">Attendance Log</button>
-                            <button onclick="switchWorkspaceRouteView('view-admin-enquiries')" class="border font-bold py-2 rounded-xl text-center hover:bg-slate-50 transition-colors text-slate-700">View Enquiries</button>
-                            <button onclick="switchWorkspaceRouteView('view-admin-notifications')" class="col-span-2 bg-rose-600 text-white font-bold py-2 rounded-xl text-center hover:bg-rose-700 transition-colors flex justify-center items-center gap-1.5"><i data-lucide="bell" class="w-4 h-4"></i> Send Push Notifications</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-admin-notifications" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="bell-ring" class="text-indigo-600"></i> Global Push Notifications Matrix</h2>
-                    <p class="text-xs text-slate-400">Transmit real-time alerts directly to active student devices across the mobile network infrastructure.</p>
-                </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Compose Push Notification Form -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 lg:col-span-1">
-                        <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="send" class="text-indigo-600"></i> Broadcast Command</h3>
-                        <form id="admin-push-notification-form" onsubmit="sendPushNotification(event)" class="space-y-4 text-xs font-bold text-slate-500">
-                            <div>
-                                <label class="block mb-1">Target Audience Segment</label>
-                                <select id="push-target-type" onchange="togglePushTargetSpecificId()" required class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-bold outline-none focus:bg-white focus:border-indigo-500">
-                                    <option value="bulk">All Active Students (Bulk Broadcast)</option>
-                                    <option value="single">Specific Single Student ID</option>
-                                </select>
-                            </div>
-                            
-                            <div id="push-target-id-container" class="hidden">
-                                <label class="block mb-1">Student Public ID</label>
-                                <input id="push-target-id" type="text" placeholder="e.g. 01J3M..." class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-mono outline-none focus:bg-white focus:border-indigo-500">
-                            </div>
-                            
-                            <div>
-                                <label class="block mb-1">Notification Title</label>
-                                <input id="push-title" type="text" required placeholder="Alert Headline" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                            </div>
-                            
-                            <div>
-                                <label class="block mb-1">Message Body</label>
-                                <textarea id="push-body" rows="4" required placeholder="Detailed message content..." class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500 resize-none"></textarea>
-                            </div>
-                            
-                            <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"><i data-lucide="zap" class="w-4 h-4"></i> Transmit Push Alert</button>
-                        </form>
-                    </div>
-                    
-                    <!-- Notification History -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 lg:col-span-2">
-                        <div class="flex justify-between items-center pb-2 border-b">
-                            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="history" class="text-indigo-600"></i> Dispatch History Log</h3>
-                            <button onclick="fetchNotificationHistory()" class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"><i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh</button>
-                        </div>
-                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="border-b text-slate-400 font-bold sticky top-0 bg-white">
-                                        <th class="py-2.5">Timestamp</th>
-                                        <th class="py-2.5">Title</th>
-                                        <th class="py-2.5">Target</th>
-                                        <th class="py-2.5 text-right">Success / Fail</th>
-                                        <th class="py-2.5 text-right">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-notifications-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
-                                    <tr><td colspan="5" class="py-4 text-center text-slate-400">Loading dispatch history...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-admin-users" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="users" class="text-indigo-600"></i> User Registry Subsystem</h2>
-                    <p class="text-xs text-slate-400">Inspect, update authorization tiers, or revoke system credentials for all active personas.</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <div class="flex flex-col sm:flex-row gap-2 justify-between items-center pb-2 border-b">
-                        <h3 class="text-sm font-black text-slate-900">All Registered Persona Entities</h3>
-                        <div class="flex gap-2 items-center">
-                            <select id="admin-user-role-filter" onchange="renderAdminUsersTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none">
-                                <option value="">All Roles</option>
-                                <option value="student">Students</option>
-                                <option value="teacher">Teachers</option>
-                                <option value="admin">Admins</option>
-                            </select>
-                            <button onclick="openAddTeacherModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2 px-3 rounded-lg shadow-md flex items-center gap-1.5"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add Teacher</button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">User ID</th><th class="py-2">Name</th><th class="py-2">Email</th><th class="py-2">Role Badge</th><th class="py-2">Created Timestamp</th><th class="py-2 text-right">Administrative Commands</th></tr></thead>
-                        <tbody id="admin-users-table-body" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-            <div id="view-admin-bookings" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="shield-alert" class="text-indigo-600"></i> Global Academic Booking Override Ledger</h2>
-                    <p class="text-xs text-slate-400">Complete listing of tutor-student allocations with override triggers.</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Ref Code</th><th class="py-2">Student Name</th><th class="py-2">Tutor Name</th><th class="py-2">Schedule Matrix</th><th class="py-2">State Status</th><th class="py-2 text-right">System Triggers</th></tr></thead>
-                        <tbody id="admin-global-bookings-table-body-override" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-            <div id="view-admin-onboarding" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="user-plus" class="text-indigo-600"></i> Faculty Onboarding Registration Queue</h2>
-                    <p class="text-xs text-slate-400">Review pending educator background checks and authorize their deployment parameters.</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Tutor Identity</th><th class="py-2">Specializations</th><th class="py-2">Base Cost Quote</th><th class="py-2">Credentials Background</th><th class="py-2 text-right">Pipeline Management</th></tr></thead>
-                        <tbody id="admin-onboarding-table-body-page" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-            <div id="view-admin-attendance" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="calendar-check-2" class="text-indigo-600"></i> Global Student Attendance Audit</h2>
-                    <p class="text-xs text-slate-400">Monitor all OTP-verified attendance records and checks submitted across student endpoints.</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Date</th><th class="py-2">Student Name</th><th class="py-2">Tutor Name</th><th class="py-2">Lecture Reference</th><th class="py-2">OTP Verification</th><th class="py-2">Status Flag</th></tr></thead>
-                        <tbody id="admin-attendance-table-body" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-            <div id="view-admin-subscriptions" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="credit-card" class="text-indigo-600"></i> Subscription Plans & Subscribers Ledger</h2>
-                    <p class="text-xs text-slate-400">Review platform membership monetization matrix and active subscription profiles.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="admin-subscription-plans-grid">
-                    <!-- Dynamic rendering of plans with edit buttons -->
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <h3 class="text-sm font-black text-slate-900">Active Account Subscribers</h3>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Subscriber Name</th><th class="py-2">Plan Name</th><th class="py-2">Pricing Cycle</th><th class="py-2">Expires On</th><th class="py-2 text-right">Status</th></tr></thead>
-                        <tbody id="admin-subscribers-table-body" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-            <div id="view-admin-enquiries" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="message-square" class="text-indigo-600"></i> Lead Callback & Enquiry Submissions</h2>
-                    <p class="text-xs text-slate-400">Respond to prospective parents and students who requested callback contacts via public index portal.</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row gap-2 justify-between items-center pb-2 border-b">
-                        <h3 class="text-sm font-black text-slate-900">Leads Inbox</h3>
-                        <div class="flex gap-2 items-center">
-                            <input type="date" id="admin-enq-date-filter" onchange="renderAdminEnquiriesTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none" title="Filter by date">
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">
-                        <thead><tr class="border-b text-slate-400 font-bold"><th class="py-2">Date</th><th class="py-2">Student / Parent</th><th class="py-2">Contact Details</th><th class="py-2">Standard & Board</th><th class="py-2">Address Locality</th><th class="py-2 text-right">Enquiry Action State</th></tr></thead>
-                        <tbody id="admin-enquiries-table-body" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
-                    </table></div>
-                </div>
-            </div>
-
-            <div id="view-admin-settings" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="settings" class="text-indigo-600"></i> Platform Configuration Management</h2>
-                    <p class="text-xs text-slate-400">Configure global platform constants, static parameters, and financial margins.</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 max-w-lg">
-                    <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5"><i data-lucide="sliders" class="text-indigo-600"></i> Parametric Controls</h3>
-                    <form onsubmit="event.preventDefault(); triggerNotificationToast('System configuration committed to active server.', 'success');" class="space-y-4 text-xs font-bold text-slate-500">
-                        <div>
-                            <label class="block mb-1">Platform Service Commission Retention (%)</label>
-                            <input type="number" value="15" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-bold outline-none">
-                        </div>
-                        <div>
-                            <label class="block mb-1">Integrated CGST + SGST statutory taxation (%)</label>
-                            <input type="number" value="18" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-bold outline-none">
-                        </div>
-                        <div>
-                            <label class="block mb-1">Global Default Maps Search Radius (KM)</label>
-                            <input type="number" value="5" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-bold outline-none">
-                        </div>
-                        <button type="submit" class="w-full bg-slate-900 text-white font-black py-2.5 rounded-xl">Save Configuration</button>
-                    </form>
-                </div>
-            </div>
-
 
             <div id="view-payment-history" class="domain-view-pane hidden space-y-6">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
@@ -977,69 +538,6 @@
                 </div>
             </div>
 
-            <div id="view-admin-inquiries" class="domain-view-pane hidden space-y-6">
-                <div>
-                    <h2 class="text-xl font-black text-slate-900 flex items-center gap-2"><i data-lucide="help-circle" class="text-indigo-600"></i> Unified Support Tickets Dashboard</h2>
-                    <p class="text-xs text-slate-400">Review, filter, and resolve inquiries submitted by both students and educators across the platform.</p>
-                </div>
-                <!-- Telemetry Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Received Tickets</p>
-                        <h3 id="admin-inq-stat-total" class="text-xl font-black text-slate-800 mt-1">0</h3>
-                    </div>
-                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 shadow-sm">
-                        <p class="text-[10px] font-bold text-indigo-500/80 uppercase tracking-wider">Pending Tickets</p>
-                        <h3 id="admin-inq-stat-pending" class="text-xl font-black text-indigo-700 mt-1">0</h3>
-                    </div>
-                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 shadow-sm">
-                        <p class="text-[10px] font-bold text-amber-500/80 uppercase tracking-wider">In-Progress Tickets</p>
-                        <h3 id="admin-inq-stat-progress" class="text-xl font-black text-amber-600 mt-1">0</h3>
-                    </div>
-                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100 shadow-sm">
-                        <p class="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wider">Resolved Tickets</p>
-                        <h3 id="admin-inq-stat-resolved" class="text-xl font-black text-emerald-700 mt-1">0</h3>
-                    </div>
-                </div>
-                <!-- Dashboard Filters & Content Table -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <div class="flex flex-col sm:flex-row gap-2 justify-between items-center pb-2 border-b">
-                        <h3 class="text-sm font-black text-slate-900">Active Support Inbox</h3>
-                        <div class="flex gap-2 items-center">
-                            <select id="admin-inq-role-filter" onchange="renderAdminInquiryTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none">
-                                <option value="">All Roles</option>
-                                <option value="student">Students</option>
-                                <option value="teacher">Teachers</option>
-                            </select>
-                            <select id="admin-inq-status-filter" onchange="renderAdminInquiryTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none">
-                                <option value="">All Statuses</option>
-                                <option value="pending">Pending</option>
-                                <option value="in-progress">In-Progress</option>
-                                <option value="resolved">Resolved</option>
-                            </select>
-                            <input type="date" id="admin-inq-date-filter" onchange="renderAdminInquiryTable()" class="bg-slate-50 border text-xs rounded-lg p-2 font-semibold text-slate-600 outline-none" title="Filter by date">
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="border-b text-slate-400 font-bold">
-                                    <th class="py-2.5 text-slate-400 font-bold">Date</th>
-                                    <th class="py-2.5 text-slate-400 font-bold">User</th>
-                                    <th class="py-2.5 text-slate-400 font-bold">Role</th>
-                                    <th class="py-2.5 text-slate-400 font-bold">Subject</th>
-                                    <th class="py-2.5 text-slate-400 font-bold">Status</th>
-                                    <th class="py-2.5 text-right text-slate-400 font-bold">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-inquiries-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
-                                <!-- Dynamic rows rendering -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
         </main>
     </div>
 
@@ -1056,7 +554,7 @@
             </div>
 
             <div class="space-y-1.5">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i data-lucide="youtube" class="text-red-500 w-3.5 h-3.5"></i> Faculty Video Lecture Showcase (In-App Preview Engine)</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i data-lucide="youtube" class="text-red-500 w-3.5 h-3.5"></i> Tutor Video Lecture Showcase (In-App Preview Engine)</p>
                 <div class="w-full aspect-video rounded-xl overflow-hidden border bg-slate-950">
                     <iframe id="modal-prof-youtube-iframe" class="w-full h-full" src="" title="YouTube lecture preview video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
@@ -1096,7 +594,7 @@
                     <select id="wizard-slot-selector" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-bold outline-none"></select>
                 </div>
                 <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200/60 font-medium text-slate-500">
-                    <div class="flex justify-between"><span>Base Program Unit Cost</span><span id="wizard-calc-base" class="font-bold text-slate-800">₹0.00</span></div>
+                    <div class="flex justify-between"><span>Home Tuition (Per Lecture Cost)</span><span id="wizard-calc-base" class="font-bold text-slate-800">₹0.00</span></div>
                     <div class="flex justify-between"><span>Integrated Platform Cess (18% Statutory GST)</span><span id="wizard-calc-tax" class="font-bold text-slate-800">₹0.00</span></div>
                     <hr class="border-slate-200 my-1">
                     <div class="flex justify-between font-black text-sm text-slate-900"><span>Total Account Payable Quantum</span><span id="wizard-calc-total">₹0.00</span></div>
@@ -1106,107 +604,6 @@
                 <button onclick="dismissAllocationWizardModal()" class="w-1/3 border py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50">Dismiss</button>
                 <button onclick="commitAccountAllocationPayment()" class="w-2/3 bg-indigo-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-md shadow-indigo-500/10 flex items-center justify-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> Complete Handshake</button>
             </div>
-        </div>
-    </div>
-
-    <div id="modal-substitute-switchboard" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div>
-                <h3 class="text-base font-black text-slate-900 tracking-tight">Tutor Swap Routing Engine</h3>
-                <p class="text-xs text-slate-400">Replace the tutor assigned to a booking code while retaining the current schedule state.</p>
-            </div>
-            <div class="space-y-3 text-xs">
-                <input type="hidden" id="swap-target-booking-id">
-                <div>
-                    <label class="block font-bold text-slate-500 mb-1">Select New Verified Faculty Node</label>
-                    <select id="swap-faculty-selector" class="w-full border p-2.5 rounded-xl bg-slate-50 font-bold text-slate-800 outline-none"></select>
-                </div>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button onclick="document.getElementById('modal-substitute-switchboard').classList.replace('flex','hidden')" class="w-1/2 border py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50">Abort Swap</button>
-                <button onclick="commitTutorSubstitutionSwap()" class="w-1/2 bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5"><i data-lucide="shuffle" class="w-4 h-4"></i> Hot-Swap Faculty</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-add-teacher" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div>
-                <h3 class="text-base font-black text-slate-900 tracking-tight">Provision New Teacher</h3>
-                <p class="text-xs text-slate-400">Directly create a new verified educator account and profile in the system database.</p>
-            </div>
-            <form id="add-teacher-form" onsubmit="commitAddTeacherRequest(event)" class="space-y-3 text-xs font-bold text-slate-500">
-                <div>
-                    <label class="block mb-1">Full Name</label>
-                    <input id="add-teacher-name" type="text" required placeholder="Dr. Anjali Sen" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block mb-1">Email Address</label>
-                    <input id="add-teacher-email" type="email" required placeholder="anjali@zeraedu.com" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block mb-1">Temporary Password</label>
-                    <input id="add-teacher-password" type="password" required placeholder="Minimum 6 characters" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block mb-1">Primary Subject Specialization</label>
-                    <input id="add-teacher-subject" type="text" required placeholder="Mathematics / Chemistry" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block mb-1">Cost Per Hour (INR)</label>
-                    <input id="add-teacher-cost" type="number" required placeholder="750" value="500" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeAddTeacherModal()" class="w-1/2 border py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 text-slate-700">Cancel</button>
-                    <button type="submit" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/10"><i data-lucide="user-plus" class="w-4 h-4"></i> Create Profile</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="modal-admin-inquiry-reply" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="text-base font-black text-slate-900 tracking-tight">Support Ticket Response</h3>
-                    <p class="text-xs text-slate-400">Review message and compose an administrative support response.</p>
-                </div>
-                <button onclick="closeAdminInquiryReplyModal()" class="text-slate-400 hover:text-slate-600 p-1.5 bg-slate-50 border rounded-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
-            </div>
-            <div class="space-y-2.5 text-xs text-slate-600 leading-relaxed max-h-[30vh] overflow-y-auto custom-scrollbar bg-slate-50 p-3 rounded-xl border border-slate-100 font-medium">
-                <div>
-                    <span class="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Submitted By</span>
-                    <span id="modal-inq-user-meta" class="font-bold text-slate-800">-</span>
-                </div>
-                <div class="pt-1.5">
-                    <span class="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Subject</span>
-                    <span id="modal-inq-subject" class="font-bold text-slate-800">-</span>
-                </div>
-                <div class="pt-1.5">
-                    <span class="font-bold text-slate-400 block uppercase tracking-wider text-[9px]">Message Details</span>
-                    <p id="modal-inq-message" class="text-slate-700 mt-0.5 font-normal">-</p>
-                </div>
-            </div>
-            <hr class="border-slate-100">
-            <form id="admin-inquiry-reply-form" onsubmit="submitAdminInquiryReply(event)" class="space-y-3 text-xs font-bold text-slate-500">
-                <input type="hidden" id="reply-target-inquiry-id">
-                <div>
-                    <label class="block mb-1">Set Ticket Status</label>
-                    <select id="reply-inq-status" class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500">
-                        <option value="pending">Pending Review</option>
-                        <option value="in-progress">In-Progress</option>
-                        <option value="resolved">Resolved / Closed</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block mb-1">Admin Response Reply Message</label>
-                    <textarea id="reply-inq-comment" rows="4" placeholder="Type your response to the user here..." class="w-full border p-2.5 rounded-xl bg-slate-50 text-slate-800 font-medium outline-none focus:bg-white focus:border-indigo-500 resize-none"></textarea>
-                </div>
-                <div class="flex gap-2 pt-1">
-                    <button type="button" onclick="closeAdminInquiryReplyModal()" class="w-1/3 border py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 text-slate-700">Cancel</button>
-                    <button type="submit" class="w-2/3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/10"><i data-lucide="check-circle" class="w-4 h-4"></i> Submit Response</button>
-                </div>
-            </form>
         </div>
     </div>
 
